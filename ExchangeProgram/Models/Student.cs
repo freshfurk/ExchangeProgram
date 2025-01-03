@@ -9,5 +9,7 @@
         public DateTime BirthDate { get; set; }
         public string MatriculationNumber { get; set; }
         public string PasswordHash { get; set; } // Für Passwörter
+
+
     }
 }

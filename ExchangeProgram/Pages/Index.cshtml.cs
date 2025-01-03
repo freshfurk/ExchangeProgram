@@ -76,6 +76,8 @@ namespace ExchangeProgram.Pages
             }
 
             TempData["SuccessMessage"] = $"Welcome back, {user.FirstName}!";
+            // Vorname speichern und weiterleiten
+            TempData["FirstName"] = user.FirstName;
             return RedirectToPage("/Dashboard");
         }
     }
