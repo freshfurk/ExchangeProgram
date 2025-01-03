@@ -48,21 +48,13 @@ namespace ExchangeProgram.Pages
 
         public IActionResult OnPostLogin()
         {
-            if (string.IsNullOrEmpty(LoginEmail) || string.IsNullOrEmpty(LoginPassword))
-            {
-                TempData["ErrorMessage"] = "Invalid login credentials.";
-                return RedirectToPage();
-            }
-
-            // Prüfen, ob der Benutzer existiert
             var user = _context.Students.FirstOrDefault(s => s.Email == LoginEmail);
             if (user == null)
             {
                 TempData["ErrorMessage"] = "User not found.";
-                return RedirectToPage();
+                return RedirectToPage("/Index");
             }
 
-            // Passwort prüfen
             using (var sha256 = SHA256.Create())
             {
                 var passwordBytes = Encoding.UTF8.GetBytes(LoginPassword);
@@ -71,14 +63,12 @@ namespace ExchangeProgram.Pages
                 if (user.PasswordHash != hashedPassword)
                 {
                     TempData["ErrorMessage"] = "Invalid password.";
-                    return RedirectToPage();
+                    return RedirectToPage("/Index");
                 }
             }
 
-            TempData["SuccessMessage"] = $"Welcome back, {user.FirstName}!";
-            // Vorname speichern und weiterleiten
-            TempData["FirstName"] = user.FirstName;
-            return RedirectToPage("/Dashboard");
+            // Benutzer-ID speichern und weiterleiten
+            return RedirectToPage("/Dashboard", new { id = user.Id });
         }
     }
 }

@@ -2,77 +2,165 @@
 @model ExchangeProgram.Pages.DashboardModel
 @using Microsoft.AspNetCore.Mvc.RazorPages
 @{
-    Layout = null;
-    string firstName = TempData["FirstName"]?.ToString() ?? "User";
+	Layout = null;
 }
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<title>Dashboard</title>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-light bg-light">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">ExchangeProgram</a>
-            <div>
-                <span class="navbar-text me-3">Hello @firstName!</span>
-                <a class="btn btn-outline-danger btn-sm" href="/Logout">Logout</a>
-            </div>
-        </div>
-    </nav>
+	<!-- Navbar -->
+	<nav class="navbar navbar-light bg-light">
+		<div class="container-fluid">
+			<a class="navbar-brand" href="#">ExchangeProgram</a>
+			<div>
+				<span class="navbar-text me-3">Hello @Model.Student.FirstName!</span>
+				<a class="btn btn-outline-danger btn-sm" href="/Logout">Logout</a>
+			</div>
+		</div>
+	</nav>
 
-    <!-- Content -->
-    <div class="container mt-4">
-        <h2>Manage your account</h2>
-        <p>Change your account settings</p>
+	<!-- Content -->
+	<div class="container mt-4">
+		<h2>Manage your account</h2>
+		<p>Change your account settings</p>
 
-        <div class="row">
-            <!-- Left Sidebar -->
-            <div class="col-md-3">
-                <div class="list-group">
-                    <a href="#profile" class="list-group-item list-group-item-action active" data-bs-toggle="tab">Profile</a>
-                    <a href="#email" class="list-group-item list-group-item-action" data-bs-toggle="tab">Email</a>
-                    <a href="#password" class="list-group-item list-group-item-action" data-bs-toggle="tab">Password</a>
-                    <a href="#personal-data" class="list-group-item list-group-item-action" data-bs-toggle="tab">Personal data</a>
-                </div>
-            </div>
+		<div class="row">
+			<!-- Left Sidebar -->
+			<div class="col-md-3">
+				<div class="list-group">
+					<a href="#profile" class="list-group-item list-group-item-action active" data-bs-toggle="tab">Profile</a>
+					<a href="#email" class="list-group-item list-group-item-action" data-bs-toggle="tab">Email</a>
+					<a href="#password" class="list-group-item list-group-item-action" data-bs-toggle="tab">Password</a>
+					<a href="#personal-data" class="list-group-item list-group-item-action" data-bs-toggle="tab">Personal data</a>
+				</div>
+			</div>
 
-            <!-- Right Content -->
-            <div class="col-md-9">
-                <div class="tab-content">
-                    <div class="tab-pane fade show active" id="profile">
-                        <h3>Profile</h3>
-                        <form>
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username</label>
-                                <input type="text" class="form-control" id="username" value="user@domain.com" readonly>
-                            </div>
-                            <div class="mb-3">
-                                <label for="phone" class="form-label">Phone number</label>
-                                <input type="text" class="form-control" id="phone" placeholder="Enter phone number">
-                            </div>
-                            <button type="submit" class="btn btn-primary">Save</button>
-                        </form>
-                    </div>
-                    <div class="tab-pane fade" id="email">
-                        <h3>Email</h3>
-                        <p>Change your email settings here.</p>
-                    </div>
-                    <div class="tab-pane fade" id="password">
-                        <h3>Password</h3>
-                        <p>Update your password here.</p>
-                    </div>
-                    <div class="tab-pane fade" id="personal-data">
-                        <h3>Personal Data</h3>
-                        <p>Manage your personal data here.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+			<!-- Right Content -->
+			<div class="col-md-9">
+				<div class="tab-content">
+					<div class="tab-pane fade show active" id="profile">
+						<h3>Profile</h3>
+
+						@if (TempData["SuccessMessage"] != null)
+						{
+							<div class="alert alert-success">
+								@TempData["SuccessMessage"]
+							</div>
+						}
+
+						@if (TempData["ErrorMessage"] != null)
+						{
+							<div class="alert alert-danger">
+								@TempData["ErrorMessage"]
+							</div>
+						}
+
+						<form method="post" asp-page-handler="SaveProfile">
+							<!-- Erste Zeile: Vorname und Nachname -->
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label for="FirstName" class="form-label">First Name</label>
+									<input type="text" class="form-control" id="FirstName" name="Student.FirstName" value="@Model.Student.FirstName">
+								</div>
+								<div class="col-md-6">
+									<label for="LastName" class="form-label">Last Name</label>
+									<input type="text" class="form-control" id="LastName" name="Student.LastName" value="@Model.Student.LastName">
+								</div>
+							</div>
+
+							<!-- Zweite Zeile: Geburtsdatum und Telefonnummer -->
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label for="BirthDate" class="form-label">Birth Date</label>
+									<input type="date" class="form-control" id="BirthDate" name="Student.BirthDate" value="@Model.Student.BirthDate.ToString("yyyy-MM-dd")">
+								</div>
+								<div class="col-md-6">
+									<label for="PhoneNumber" class="form-label">Phone Number</label>
+									<input type="text" class="form-control" id="PhoneNumber" name="Student.PhoneNumber" value="@Model.Student.PhoneNumber">
+								</div>
+							</div>
+
+							<!-- Dritte Zeile: Adresse -->
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label for="Address" class="form-label">Address</label>
+									<input type="text" class="form-control" id="Address" name="Student.Address" value="@Model.Student.Address">
+								</div>
+								<div class="col-md-3">
+									<label for="HouseNumber" class="form-label">House Number</label>
+									<input type="text" class="form-control" id="HouseNumber" name="Student.HouseNumber" value="@Model.Student.HouseNumber">
+								</div>
+								<div class="col-md-3">
+									<label for="City" class="form-label">City</label>
+									<input type="text" class="form-control" id="City" name="Student.City" value="@Model.Student.City">
+								</div>
+							</div>
+
+							<!-- Vierte Zeile: Land und Matrikelnummer -->
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label for="Country" class="form-label">Country</label>
+									<input type="text" class="form-control" id="Country" name="Student.Country" value="@Model.Student.Country">
+								</div>
+								<div class="col-md-6">
+									<label for="MatriculationNumber" class="form-label">Matriculation Number</label>
+									<input type="text" class="form-control" id="MatriculationNumber" name="Student.MatriculationNumber" value="@Model.Student.MatriculationNumber">
+								</div>
+							</div>
+
+							<!-- Fünfte Zeile: Universitätsname und Studienfach -->
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label for="UniversityName" class="form-label">University Name</label>
+									<input type="text" class="form-control" id="UniversityName" name="Student.UniversityName" value="@Model.Student.UniversityName">
+								</div>
+								<div class="col-md-6">
+									<label for="StudyField" class="form-label">Study Field</label>
+									<input type="text" class="form-control" id="StudyField" name="Student.StudyField" value="@Model.Student.StudyField">
+								</div>
+							</div>
+
+							<!-- Sechste Zeile: Abschluss -->
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label for="Degree" class="form-label">Degree</label>
+									<select class="form-control" id="Degree" name="Student.Degree">
+										<option value=""></option>
+										<option value="Bachelor">Bachelor</option>
+										<option value="Master">Master</option>
+									</select>
+								</div>
+							</div>
+
+							<!-- Speichern-Button -->
+							<div class="row">
+								<div class="col-md-12 text-end">
+									<button type="submit" class="btn btn-primary">Save Changes</button>
+								</div>
+							</div>
+						</form>
+					</div>
+
+					<div class="tab-pane fade" id="email">
+						<h3>Email</h3>
+						<p>Change your email settings here.</p>
+					</div>
+					<div class="tab-pane fade" id="password">
+						<h3>Password</h3>
+						<p>Update your password here.</p>
+					</div>
+					<div class="tab-pane fade" id="personal-data">
+						<h3>Personal Data</h3>
+						<p>Manage your personal data here.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </body>
 </html>
