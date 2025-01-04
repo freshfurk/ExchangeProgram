@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using ExchangeProgram.Models;
 using ExchangeProgram.Data;
+using Microsoft.VisualBasic.FileIO;
 
 namespace ExchangeProgram.Pages
 {
@@ -16,6 +17,14 @@ namespace ExchangeProgram.Pages
 
         [BindProperty]
         public Student Student { get; set; }
+
+        [BindProperty]
+        public IFormFile File { get; set; }
+
+        [BindProperty]
+        public string FileType { get; set; }
+
+        public List<Document> Documents { get; set; }
 
         public IActionResult OnGet(int id)
         {
@@ -32,6 +41,8 @@ namespace ExchangeProgram.Pages
                 TempData["ErrorMessage"] = "User not found.";
                 return RedirectToPage("/Index");
             }
+
+            Documents = _context.Documents.Where(d => d.StudentId == id).ToList();
 
             TempData["UserId"] = id; // Id in TempData speichern
             return Page();
@@ -72,6 +83,82 @@ namespace ExchangeProgram.Pages
             _context.SaveChanges();
             TempData["SuccessMessage"] = "Profile updated successfully!";
 
+            return RedirectToPage("/Dashboard", new { id });
+        }
+
+        public IActionResult OnPostUploadDocument()
+        {
+            if (!TempData.ContainsKey("UserId") || Convert.ToInt32(TempData["UserId"]) == 0)
+            {
+                TempData["ErrorMessage"] = "User ID not found.";
+                return RedirectToPage("/Index");
+            }
+
+            int id = Convert.ToInt32(TempData["UserId"]);
+
+            var student = _context.Students.FirstOrDefault(s => s.Id == id);
+            if (student == null)
+            {
+                TempData["ErrorMessage"] = "Student not found.";
+                return RedirectToPage("/Index");
+            }
+
+            if (File != null)
+            {
+                using var memoryStream = new MemoryStream();
+                File.CopyTo(memoryStream);
+                var fileData = memoryStream.ToArray();
+
+                var document = new Document
+                {
+                    FileName = File.FileName,
+                    FileType = FileType,
+                    FileData = fileData,
+                    StudentId = id // Sicherstellen, dass die ID existiert
+                };
+
+                _context.Documents.Add(document);
+                _context.SaveChanges();
+
+                TempData["SuccessMessage"] = "Document uploaded successfully!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "No file selected.";
+            }
+
+            TempData["ActiveTab"] = "documents"; // Dokumenten-Tab aktiv halten
+            return RedirectToPage("/Dashboard", new { id });
+        }
+
+        public IActionResult OnGetDownloadDocument(int documentId)
+        {
+            var document = _context.Documents.FirstOrDefault(d => d.Id == documentId);
+            if (document != null)
+            {
+                return File(document.FileData, "application/octet-stream", document.FileName);
+            }
+            return NotFound();
+        }
+
+        public IActionResult OnPostDeleteDocument(int documentId)
+        {
+            if (!TempData.ContainsKey("UserId") || Convert.ToInt32(TempData["UserId"]) == 0)
+            {
+                TempData["ErrorMessage"] = "User ID not found.";
+                return RedirectToPage("/Index");
+            }
+
+            int id = Convert.ToInt32(TempData["UserId"]);
+
+            var document = _context.Documents.FirstOrDefault(d => d.Id == documentId);
+            if (document != null)
+            {
+                _context.Documents.Remove(document);
+                _context.SaveChanges();
+            }
+
+            TempData["ActiveTab"] = "documents"; // Dokumenten-Tab aktiv halten
             return RedirectToPage("/Dashboard", new { id });
         }
     }

@@ -3,6 +3,11 @@
 @using Microsoft.AspNetCore.Mvc.RazorPages
 @{
 	Layout = null;
+	
+	if (string.IsNullOrEmpty(TempData["ActiveTab"]?.ToString()))
+	{
+		TempData["ActiveTab"] = "profile"; // Standard-Tab
+	}
 }
 
 <!DOCTYPE html>
@@ -26,6 +31,20 @@
 
 	<!-- Content -->
 	<div class="container mt-4">
+		@if (TempData["SuccessMessage"] != null)
+		{
+			<div class="alert alert-success">
+				@TempData["SuccessMessage"]
+			</div>
+		}
+
+		@if (TempData["ErrorMessage"] != null)
+		{
+			<div class="alert alert-danger">
+				@TempData["ErrorMessage"]
+			</div>
+		}
+
 		<h2>Manage your account</h2>
 		<p>Change your account settings</p>
 
@@ -33,32 +52,23 @@
 			<!-- Left Sidebar -->
 			<div class="col-md-3">
 				<div class="list-group">
-					<a href="#profile" class="list-group-item list-group-item-action active" data-bs-toggle="tab">Profile</a>
+					<a href="#profile"
+					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "profile" ? "active" : "")"
+					   data-bs-toggle="tab">Profile</a>
 					<a href="#email" class="list-group-item list-group-item-action" data-bs-toggle="tab">Email</a>
 					<a href="#password" class="list-group-item list-group-item-action" data-bs-toggle="tab">Password</a>
-					<a href="#personal-data" class="list-group-item list-group-item-action" data-bs-toggle="tab">Personal data</a>
+					<a href="#documents"
+					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "documents" ? "active" : "")"
+					   data-bs-toggle="tab">Documents</a>
 				</div>
+
 			</div>
 
 			<!-- Right Content -->
 			<div class="col-md-9">
 				<div class="tab-content">
-					<div class="tab-pane fade show active" id="profile">
+					<div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "profile" ? "show active" : "")" id="profile">
 						<h3>Profile</h3>
-
-						@if (TempData["SuccessMessage"] != null)
-						{
-							<div class="alert alert-success">
-								@TempData["SuccessMessage"]
-							</div>
-						}
-
-						@if (TempData["ErrorMessage"] != null)
-						{
-							<div class="alert alert-danger">
-								@TempData["ErrorMessage"]
-							</div>
-						}
 
 						<form method="post" asp-page-handler="SaveProfile">
 							<!-- Erste Zeile: Vorname und Nachname -->
@@ -154,9 +164,67 @@
 						<h3>Password</h3>
 						<p>Update your password here.</p>
 					</div>
-					<div class="tab-pane fade" id="personal-data">
-						<h3>Personal Data</h3>
-						<p>Manage your personal data here.</p>
+
+					<div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "documents" ? "show active" : "")" id="documents">
+						<h3>Documents</h3>
+						<p>Upload and manage your documents.</p>
+
+						<!-- Datei-Upload-Formular -->
+						<form method="post" enctype="multipart/form-data" asp-page-handler="UploadDocument">
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label for="FileType" class="form-label">Document Type</label>
+									<select class="form-select" id="FileType" name="FileType" required>
+										<option value="" disabled selected>Select Document Type</option>
+										<option value="Motivation Letter">Motivation Letter</option>
+										<option value="Transcript">Transcript</option>
+										<option value="CV">CV</option>
+									</select>
+								</div>
+								<div class="col-md-6">
+									<label for="File" class="form-label">Choose File</label>
+									<input type="file" class="form-control" id="File" name="File" required>
+								</div>
+							</div>
+							<button type="submit" class="btn btn-primary">Upload</button>
+						</form>
+
+						<!-- Hochgeladene Dokumente anzeigen -->
+						<div class="mt-4">
+							<h4>Your Uploaded Documents</h4>
+							@if (Model.Documents != null && Model.Documents.Any())
+							{
+								<table class="table table-striped">
+									<thead>
+										<tr>
+											<th>Document Type</th>
+											<th>File Name</th>
+											<th>Actions</th>
+										</tr>
+									</thead>
+									<tbody>
+										@foreach (var document in Model.Documents)
+										{
+											<tr>
+												<td>@document.FileType</td>
+												<td>@document.FileName</td>
+												<td>
+													<a asp-page-handler="DownloadDocument" asp-route-documentId="@document.Id" class="btn btn-sm btn-primary">Download</a>
+													<form method="post" asp-page-handler="DeleteDocument" class="d-inline">
+														<input type="hidden" name="DocumentId" value="@document.Id">
+														<button type="submit" class="btn btn-sm btn-danger">Delete</button>
+													</form>
+												</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+							}
+							else
+							{
+								<p>No documents uploaded yet. Use the form above to upload your first document.</p>
+							}
+						</div>
 					</div>
 				</div>
 			</div>

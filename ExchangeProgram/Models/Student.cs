@@ -19,5 +19,8 @@
         public string? UniversityName { get; set; } // Universitätsname
         public string? StudyField { get; set; } // Studienfach
         public string? Degree { get; set; } // Abschluss
+
+        // Navigation Property
+        public ICollection<Document> Documents { get; set; }
     }
 }
