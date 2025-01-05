@@ -22,5 +22,8 @@
 
         // Navigation Property
         public ICollection<Document> Documents { get; set; }
+
+        // Profilbild
+        public byte[]? ProfilePicture { get; set; }
     }
 }

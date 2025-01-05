@@ -101,6 +101,9 @@ namespace ExchangeProgram.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<byte[]>("ProfilePicture")
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<string>("StudyField")
                         .HasColumnType("nvarchar(max)");
 

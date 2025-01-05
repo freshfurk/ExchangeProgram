@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExchangeProgram.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250104125202_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250105161033_StudentProfilDocumentPicture")]
+    partial class StudentProfilDocumentPicture
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -103,6 +103,9 @@ namespace ExchangeProgram.Migrations
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("ProfilePicture")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("StudyField")
                         .HasColumnType("nvarchar(max)");

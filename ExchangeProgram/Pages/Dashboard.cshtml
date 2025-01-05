@@ -70,7 +70,25 @@
 					<div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "profile" ? "show active" : "")" id="profile">
 						<h3>Profile</h3>
 
-						<form method="post" asp-page-handler="SaveProfile">
+						<form method="post" enctype="multipart/form-data" asp-page-handler="SaveProfile">
+							<!-- Anzeige des Profilbildes -->
+							<div class="mb-3">
+								@if (Model.Student.ProfilePicture != null)
+								{
+									<img src="data:image/png;base64,@Convert.ToBase64String(Model.Student.ProfilePicture)" alt="Profile Picture" class="img-thumbnail" style="width: 150px; height: 150px;">
+								}
+								else
+								{
+									<p>No profile picture uploaded.</p>
+								}
+							</div>
+
+							<!-- Profilbild hochladen -->
+							<div class="mb-3">
+								<label for="ProfilePicture" class="form-label">Upload Profile Picture</label>
+								<input type="file" class="form-control" id="ProfilePicture" name="ProfilePicture">
+							</div>
+
 							<!-- Erste Zeile: Vorname und Nachname -->
 							<div class="row mb-3">
 								<div class="col-md-6">

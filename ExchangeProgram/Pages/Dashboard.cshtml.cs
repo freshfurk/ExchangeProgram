@@ -48,7 +48,7 @@ namespace ExchangeProgram.Pages
             return Page();
         }
 
-        public IActionResult OnPostSaveProfile()
+        public IActionResult OnPostSaveProfile(IFormFile ProfilePicture)
         {
             // Id aus TempData abrufen
             if (!TempData.ContainsKey("UserId") || Convert.ToInt32(TempData["UserId"]) == 0)
@@ -79,6 +79,23 @@ namespace ExchangeProgram.Pages
             existingStudent.UniversityName = Student.UniversityName;
             existingStudent.StudyField = Student.StudyField;
             existingStudent.Degree = Student.Degree;
+
+            if (ProfilePicture != null && ProfilePicture.Length > 0)
+            {
+                using var memoryStream = new MemoryStream();
+                ProfilePicture.CopyTo(memoryStream);
+
+                // Optional: Bildvalidierung hinzufügen
+                if (ProfilePicture.ContentType == "image/jpeg" || ProfilePicture.ContentType == "image/png")
+                {
+                    existingStudent.ProfilePicture = memoryStream.ToArray();
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Invalid image format. Only JPEG and PNG are allowed.";
+                    return RedirectToPage("/Dashboard", new { id });
+                }
+            }
 
             _context.SaveChanges();
             TempData["SuccessMessage"] = "Profile updated successfully!";
