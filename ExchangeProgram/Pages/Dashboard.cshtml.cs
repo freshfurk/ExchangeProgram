@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using ExchangeProgram.Models;
 using ExchangeProgram.Data;
 using Microsoft.VisualBasic.FileIO;
+using System.Text;
+using System.Security.Cryptography;
 
 namespace ExchangeProgram.Pages
 {
@@ -42,7 +44,7 @@ namespace ExchangeProgram.Pages
                 return RedirectToPage("/Index");
             }
 
-            // Zugriff nur fÃ¼r Studenten
+            // Zugriff nur für Studenten
             if (!Student.isStudent)
             {
                 TempData["ErrorMessage"] = "Unauthorized access.";
@@ -183,6 +185,102 @@ namespace ExchangeProgram.Pages
             }
 
             TempData["ActiveTab"] = "documents"; // Dokumenten-Tab aktiv halten
+            return RedirectToPage("/Dashboard", new { id });
+        }
+
+        public IActionResult OnPostChangeEmail(string CurrentEmail, string NewEmail, string ConfirmEmail)
+        {
+            // Benutzer-ID aus TempData abrufen
+            if (!TempData.ContainsKey("UserId") || Convert.ToInt32(TempData["UserId"]) == 0)
+            {
+                TempData["ErrorMessage"] = "User ID not found.";
+                return RedirectToPage("/Index");
+            }
+
+            int id = Convert.ToInt32(TempData["UserId"]);
+
+            var existingStudent = _context.Students.FirstOrDefault(s => s.Id == id);
+            if (existingStudent == null)
+            {
+                TempData["ErrorMessage"] = "User not found in the database.";
+                return RedirectToPage("/Index");
+            }
+
+            // Prüfen, ob die aktuelle E-Mail-Adresse korrekt ist
+            if (existingStudent.Email != CurrentEmail)
+            {
+                TempData["ErrorMessage"] = "Current email does not match.";
+                TempData["ActiveTab"] = "email"; // E-Mail-Tab aktiv halten
+                return RedirectToPage("/Dashboard", new { id });
+            }
+
+            // Neue E-Mail-Adresse und Bestätigung prüfen
+            if (NewEmail != ConfirmEmail)
+            {
+                TempData["ErrorMessage"] = "New email and confirmation do not match.";
+                TempData["ActiveTab"] = "email"; // E-Mail-Tab aktiv halten
+                return RedirectToPage("/Dashboard", new { id });
+            }
+
+            // Neue E-Mail-Adresse speichern
+            existingStudent.Email = NewEmail;
+
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = "Email updated successfully!";
+            TempData["ActiveTab"] = "email"; // E-Mail-Tab aktiv halten
+            return RedirectToPage("/Dashboard", new { id });
+        }
+
+        public IActionResult OnPostChangePassword(string OldPassword, string NewPassword, string ConfirmPassword)
+        {
+            // Benutzer-ID aus TempData abrufen
+            if (!TempData.ContainsKey("UserId") || Convert.ToInt32(TempData["UserId"]) == 0)
+            {
+                TempData["ErrorMessage"] = "User ID not found.";
+                return RedirectToPage("/Index");
+            }
+
+            int id = Convert.ToInt32(TempData["UserId"]);
+
+            var existingStudent = _context.Students.FirstOrDefault(s => s.Id == id);
+            if (existingStudent == null)
+            {
+                TempData["ErrorMessage"] = "User not found in the database.";
+                return RedirectToPage("/Index");
+            }
+
+            // Altes Passwort prüfen
+            using (var sha256 = SHA256.Create())
+            {
+                var oldPasswordHash = Convert.ToBase64String(sha256.ComputeHash(Encoding.UTF8.GetBytes(OldPassword)));
+                if (existingStudent.PasswordHash != oldPasswordHash)
+                {
+                    TempData["ErrorMessage"] = "Incorrect old password.";
+                    TempData["ActiveTab"] = "password"; // Passwort-Tab aktiv halten
+                    return RedirectToPage("/Dashboard", new { id });
+                }
+            }
+
+            // Neues Passwort und Bestätigung prüfen
+            if (NewPassword != ConfirmPassword)
+            {
+                TempData["ErrorMessage"] = "New password and confirmation do not match.";
+                TempData["ActiveTab"] = "password"; // Passwort-Tab aktiv halten
+                return RedirectToPage("/Dashboard", new { id });
+            }
+
+            // Neues Passwort speichern
+            using (var sha256 = SHA256.Create())
+            {
+                var newPasswordHash = Convert.ToBase64String(sha256.ComputeHash(Encoding.UTF8.GetBytes(NewPassword)));
+                existingStudent.PasswordHash = newPasswordHash;
+            }
+
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = "Password updated successfully!";
+            TempData["ActiveTab"] = "password"; // Passwort-Tab aktiv halten
             return RedirectToPage("/Dashboard", new { id });
         }
     }

@@ -3,7 +3,7 @@
 @using Microsoft.AspNetCore.Mvc.RazorPages
 @{
 	Layout = null;
-	
+
 	if (string.IsNullOrEmpty(TempData["ActiveTab"]?.ToString()))
 	{
 		TempData["ActiveTab"] = "profile"; // Standard-Tab
@@ -54,12 +54,14 @@
 				<div class="list-group">
 					<a href="#profile"
 					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "profile" ? "active" : "")"
-					   data-bs-toggle="tab">Profile</a>
-					<a href="#email" class="list-group-item list-group-item-action" data-bs-toggle="tab">Email</a>
-					<a href="#password" class="list-group-item list-group-item-action" data-bs-toggle="tab">Password</a>
+					   data-bs-toggle="tab" onclick="clearMessages()">Profile</a>
+					<a href="#email" class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "email" ? "active" : "")"
+					   data-bs-toggle="tab" onclick="clearMessages()">Email</a>
+					<a href="#password" class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "password" ? "active" : "")"
+					   data-bs-toggle="tab" onclick="clearMessages()">Password</a>
 					<a href="#documents"
 					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "documents" ? "active" : "")"
-					   data-bs-toggle="tab">Documents</a>
+					   data-bs-toggle="tab" onclick="clearMessages()">Documents</a>
 				</div>
 
 			</div>
@@ -174,14 +176,47 @@
 						</form>
 					</div>
 
-					<div class="tab-pane fade" id="email">
-						<h3>Email</h3>
-						<p>Change your email settings here.</p>
+					<!-- Email umändern -->
+					<div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "email" ? "show active" : "")" id="email">
+						<h3>Change Email Address</h3>
+						<form method="post" asp-page-handler="ChangeEmail">
+							<div class="mb-3">
+								<label for="CurrentEmail" class="form-label">Current Email</label>
+								<input type="email" class="form-control" id="CurrentEmail" name="CurrentEmail" required />
+							</div>
+							<div class="mb-3">
+								<label for="NewEmail" class="form-label">New Email</label>
+								<input type="email" class="form-control" id="NewEmail" name="NewEmail" required />
+							</div>
+							<div class="mb-3">
+								<label for="ConfirmEmail" class="form-label">Confirm New Email</label>
+								<input type="email" class="form-control" id="ConfirmEmail" name="ConfirmEmail" required />
+							</div>
+							<button type="submit" class="btn btn-primary">Update Email</button>
+						</form>
 					</div>
-					<div class="tab-pane fade" id="password">
-						<h3>Password</h3>
-						<p>Update your password here.</p>
+
+
+					<!-- Passwort umändern -->
+					<div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "password" ? "show active" : "")" id="password">
+						<h3>Change Password</h3>
+						<form method="post" asp-page-handler="ChangePassword">
+							<div class="mb-3">
+								<label for="OldPassword" class="form-label">Old Password</label>
+								<input type="password" class="form-control" id="OldPassword" name="OldPassword" required />
+							</div>
+							<div class="mb-3">
+								<label for="NewPassword" class="form-label">New Password</label>
+								<input type="password" class="form-control" id="NewPassword" name="NewPassword" required />
+							</div>
+							<div class="mb-3">
+								<label for="ConfirmPassword" class="form-label">Confirm New Password</label>
+								<input type="password" class="form-control" id="ConfirmPassword" name="ConfirmPassword" required />
+							</div>
+							<button type="submit" class="btn btn-primary">Update Password</button>
+						</form>
 					</div>
+
 
 					<div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "documents" ? "show active" : "")" id="documents">
 						<h3>Documents</h3>
@@ -248,5 +283,12 @@
 			</div>
 		</div>
 	</div>
+
+	<script>
+		function clearMessages() {
+			const alerts = document.querySelectorAll('.alert');
+			alerts.forEach(alert => alert.remove());
+		}
+	</script>
 </body>
 </html>
