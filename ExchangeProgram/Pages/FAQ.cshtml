@@ -1,0 +1,185 @@
+﻿@page
+@model ExchangeProgram.Pages.FAQModel
+@using ExchangeProgram.Models
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ</title>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .faq-section {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 50px;
+        }
+
+        .faq-title {
+            color: rgb(3, 77, 148);
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .faq-category {
+            font-size: 1.5rem;
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .faq-item {
+            margin-bottom: 15px;
+        }
+
+        .faq-item-question {
+            font-weight: bold;
+        }
+
+        .faq-item-answer {
+            margin-left: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg" style="background-color: rgb(3, 77, 148);">
+        <div class="container-fluid">
+            <a class="navbar-brand text-white" href="#">
+                @* Uni Logo *@
+                @* <img src="/pictures/Uni-duisburg-essen-logo.jpg" alt="GESCO Logo" height="30" class="d-inline-block align-text-top"> *@
+                GESCO
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon" style="filter: invert(1);"></span> <!-- Toggler-Icon invertieren, damit es sichtbar bleibt -->
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-page="/Index">Homepage</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#apply-section">Apply</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#aboutus-section">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-page="/LoginRegister">My Profile</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- FAQ Section -->
+    <div class="container faq-section" id="faq-section">
+        <h1 class="faq-title">Frequently Asked Questions (FAQ)</h1>
+
+        <!-- General -->
+        <div class="faq-category">General</div>
+        <div class="faq-item">
+            <div class="faq-item-question">1. What is the Exchange Program Portal?</div>
+            <div class="faq-item-answer">The Exchange Program Portal is a platform specifically designed to simplify the application process for international exchange programs. It allows students to manage their applications, upload documents, and track the status of their application.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-item-question">2. Who can use the portal?</div>
+            <div class="faq-item-answer">
+                The portal is intended for:
+                <ul>
+                    <li>Students who want to apply for exchange programs.</li>
+                    <li>Organizers who manage applications and monitor the application process.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Application -->
+        <div class="faq-category">Application</div>
+        <div class="faq-item">
+            <div class="faq-item-question">3. How can I apply for an exchange program?</div>
+            <div class="faq-item-answer">
+                <ul>
+                    <li>Register on the portal and create your personal profile.</li>
+                    <li>Upload the required documents (e.g., motivation letter, CV, and transcript).</li>
+                    <li>Submit your application and wait for updates on the application status.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-item-question">4. What documents do I need to submit?</div>
+            <div class="faq-item-answer">
+                Typical requirements include:
+                <ul>
+                    <li>Motivational letter (in English)</li>
+                    <li>Curriculum Vitae</li>
+                    <li>Transcript of Records</li>
+                    <li>Letter of recommendation (optional)</li>
+                </ul>
+            </div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-item-question">5. Can I edit my application after I have submitted it?</div>
+            <div class="faq-item-answer">No, once submitted, your application cannot be edited. Please check all details carefully before submitting.</div>
+        </div>
+
+        <!-- Documents -->
+        <div class="faq-category">Documents</div>
+        <div class="faq-item">
+            <div class="faq-item-question">6. In what format should the documents be uploaded?</div>
+            <div class="faq-item-answer">Documents should be uploaded in PDF format. The maximum file size is 5 MB per document.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-item-question">7. What do I do if I uploaded a wrong document?</div>
+            <div class="faq-item-answer">You can delete the document in the "My Documents" section and upload a new version before submitting your application.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-item-question">8. Are my documents safe?</div>
+            <div class="faq-item-answer">Yes, the portal uses modern encryption technologies to ensure that your personal data and documents are protected.</div>
+        </div>
+
+        <!-- Application process -->
+        <div class="faq-category">Application Process</div>
+        <div class="faq-item">
+            <div class="faq-item-question">9. How long does it take to process my application?</div>
+            <div class="faq-item-answer">The processing time varies depending on the program and the number of applications. In addition, the program organizer determines the speed of feedback.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-item-question">10. How do I know if my application was successful?</div>
+            <div class="faq-item-answer">The status of your application is displayed in the portal. This provides you with information about the processing of your application.</div>
+        </div>
+
+        <!-- Support & Help -->
+        <div class="faq-category">Support & Help</div>
+        <div class="faq-item">
+            <div class="faq-item-question">11. What do I do if I have problems uploading documents?</div>
+            <div class="faq-item-answer">Please make sure that your files are in the correct format and do not exceed the maximum file size of 5 MB. If you have any further problems, you can contact our support team: furkan.akmantar@stud.uni-due.de.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-item-question">12. Is there a contact person for further questions?</div>
+            <div class="faq-item-answer">Yes, if you have any questions or problems, please contact our support team at: furkan.akmantar@stud.uni-due.de.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-item-question">13. Can I have my data deleted after completing the program?</div>
+            <div class="faq-item-answer">Yes, you can send a request for data deletion. Please contact us at furkan.akmantar@stud.uni-due.de.</div>
+        </div>
+
+        <!-- Programs -->
+        <div class="faq-category">Programs</div>
+        <div class="faq-item">
+            <div class="faq-item-question">14. What exchange programs are available?</div>
+            <div class="faq-item-answer">We offer exchange opportunities with universities in Southeast Asia.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-item-question">15. What courses are available for the exchange program?</div>
+            <div class="faq-item-answer">The program is mainly designed for engineering and science students, but students from other disciplines can also apply.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-item-question">16. Are there language requirements for participation?</div>
+            <div class="faq-item-answer">Yes, most programs require English skills at least at B2 level. Some programs may require additional language skills.</div>
+        </div>
+    </div>
+</body>
+</html>
