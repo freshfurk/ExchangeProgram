@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExchangeProgram.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250105161033_StudentProfilDocumentPicture")]
-    partial class StudentProfilDocumentPicture
+    [Migration("20250111111710_OrganizerAdded")]
+    partial class OrganizerAdded
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -94,7 +94,6 @@ namespace ExchangeProgram.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MatriculationNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
@@ -112,6 +111,9 @@ namespace ExchangeProgram.Migrations
 
                     b.Property<string>("UniversityName")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("isStudent")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 

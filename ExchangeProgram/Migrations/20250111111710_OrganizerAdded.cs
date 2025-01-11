@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ExchangeProgram.Migrations
 {
     /// <inheritdoc />
-    public partial class StudentProfilDocumentPicture : Migration
+    public partial class OrganizerAdded : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -21,7 +21,7 @@ namespace ExchangeProgram.Migrations
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     BirthDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    MatriculationNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MatriculationNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     HouseNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -31,7 +31,8 @@ namespace ExchangeProgram.Migrations
                     UniversityName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     StudyField = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Degree = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ProfilePicture = table.Column<byte[]>(type: "varbinary(max)", nullable: true)
+                    ProfilePicture = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    isStudent = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {

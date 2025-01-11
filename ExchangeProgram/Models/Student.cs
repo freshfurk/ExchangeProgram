@@ -7,7 +7,7 @@
         public string LastName { get; set; }
         public string Email { get; set; }
         public DateTime BirthDate { get; set; }
-        public string MatriculationNumber { get; set; }
+        public string? MatriculationNumber { get; set; }
         public string PasswordHash { get; set; } // Für Passwörter
 
         // Neue Felder
@@ -25,5 +25,8 @@
 
         // Profilbild
         public byte[]? ProfilePicture { get; set; }
+
+        // is Student?
+        public bool isStudent { get; set; }
     }
 }

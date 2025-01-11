@@ -42,6 +42,13 @@ namespace ExchangeProgram.Pages
                 return RedirectToPage("/Index");
             }
 
+            // Zugriff nur für Studenten
+            if (!Student.isStudent)
+            {
+                TempData["ErrorMessage"] = "Unauthorized access.";
+                return RedirectToPage("/OrganizerDashboard", new { id });
+            }
+
             Documents = _context.Documents.Where(d => d.StudentId == id).ToList();
 
             TempData["UserId"] = id; // Id in TempData speichern

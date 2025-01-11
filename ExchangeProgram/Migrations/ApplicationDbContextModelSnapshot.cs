@@ -91,7 +91,6 @@ namespace ExchangeProgram.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MatriculationNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
@@ -109,6 +108,9 @@ namespace ExchangeProgram.Migrations
 
                     b.Property<string>("UniversityName")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("isStudent")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
