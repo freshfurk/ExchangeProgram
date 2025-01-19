@@ -9,6 +9,7 @@ namespace ExchangeProgram.Data
 
         public DbSet<Student> Students { get; set; }
         public DbSet<Document> Documents { get; set; }
+        public DbSet<Programs> Programs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -1,15 +1,289 @@
 ﻿@page
 @model ExchangeProgram.Pages.OrganizerDashboardModel
+@using Microsoft.AspNetCore.Mvc.RazorPages
 @{
+	Layout = null;
+	if (string.IsNullOrEmpty(TempData["ActiveTab"]?.ToString()))
+	{
+		TempData["ActiveTab"] = "students"; // Standard-Tab
+	}
 }
 
 <!DOCTYPE html>
 <html>
 <head>
-    <h1>Hallo Organizer</h1>
+	<title>Organizer Dashboard</title>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<style>
+		.details-row {
+			background-color: #f9f9f9;
+		}
+
+		.details-container {
+			padding: 10px;
+		}
+
+		.d-none {
+			display: none;
+		}
+	</style>
 </head>
 <body>
-    
+	<!-- Navbar -->
+	<nav class="navbar navbar-light bg-light">
+		<div class="container-fluid">
+			<a class="navbar-brand" href="#">ExchangeProgram</a>
+			<div>
+				<span class="navbar-text me-3">Hello, Organizer!</span>
+				<a class="btn btn-outline-danger btn-sm" href="/Logout">Logout</a>
+			</div>
+		</div>
+	</nav>
+
+	<!-- Content -->
+	<div class="container mt-4">
+		@if (TempData["SuccessMessage"] != null)
+		{
+			<div class="alert alert-success">
+				@TempData["SuccessMessage"]
+			</div>
+		}
+
+		@if (TempData["ErrorMessage"] != null)
+		{
+			<div class="alert alert-danger">
+				@TempData["ErrorMessage"]
+			</div>
+		}
+
+		<h2>Manage Students and Your Account</h2>
+		<p>Use the tabs below to manage your account and oversee student information.</p>
+
+		<div class="row">
+			<!-- Left Sidebar -->
+			<div class="col-md-3">
+				<div class="list-group">
+					<a href="#students"
+					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "students" ? "active" : "")"
+					   data-bs-toggle="tab" onclick="clearMessages()">Manage Students</a>
+					<a href="#programs"
+					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "programs" ? "active" : "")"
+					   data-bs-toggle="tab" onclick="clearMessages()">Manage Programs</a>
+					<a href="#email"
+					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "email" ? "active" : "")"
+					   data-bs-toggle="tab" onclick="clearMessages()">Change Email</a>
+					<a href="#password"
+					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "password" ? "active" : "")"
+					   data-bs-toggle="tab" onclick="clearMessages()">Change Password</a>
+				</div>
+			</div>
+
+			<!-- Right Content -->
+			<div class="col-md-9">
+				<div class="tab-content">
+					<!-- Manage Students Tab -->
+					<div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "students" ? "show active" : "")" id="students">
+						<h3>Manage Applications</h3>
+						<p>Click on a student to view detailed information and manage their application.</p>
+
+						<!-- Filter and Sort Options -->
+						<div class="mb-3">
+							<button class="btn btn-primary btn-sm" onclick="generateApplicantsReport()">Generate Applicants Report</button>
+							<button class="btn btn-secondary btn-sm" onclick="generateApplicationsReport()">Generate Applications Report</button>
+						</div>
+
+						<!-- Students Table -->
+						<table class="table table-bordered">
+							<thead>
+								<tr>
+									<th>First Name</th>
+									<th>Last Name</th>
+									<th>Email</th>
+									<th>Matriculation Number</th>
+									<th>Status</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var student in Model.Students)
+								{
+									<tr>
+										<td>@student.FirstName</td>
+										<td>@student.LastName</td>
+										<td>@student.Email</td>
+										<td>@student.MatriculationNumber</td>
+										<td>Pending</td>
+										<td>
+											<button class="btn btn-primary btn-sm" onclick="toggleDetails(this)">View More</button>
+										</td>
+									</tr>
+									<tr class="details-row d-none">
+										<td colspan="6">
+											<div class="details-container">
+												<strong>Details:</strong><br />
+												<img src="data:image/png;base64,@Convert.ToBase64String(student.ProfilePicture ?? new byte[0])" alt="Profile Picture" class="img-thumbnail" style="width: 150px; height: 150px;" /><br />
+												<strong>Birth Date:</strong> @student.BirthDate.ToShortDateString() <br />
+												<strong>Address:</strong> @student.Address, @student.City <br />
+												<strong>Country:</strong> @student.Country <br />
+												<strong>Phone Number:</strong> @student.PhoneNumber <br />
+												<strong>Documents:</strong>
+												<ul>
+													@foreach (var doc in student.Documents)
+													{
+														<li>
+															@doc.FileName
+															<a href="@Url.Page("/DownloadDocument", new { documentId = doc.Id })" class="btn btn-sm btn-link">Download</a>
+														</li>
+													}
+												</ul>
+												<button class="btn btn-success btn-sm" onclick="approveStudent(@student.Id)">Approve</button>
+												<button class="btn btn-danger btn-sm" onclick="rejectStudent(@student.Id)">Reject</button>
+												<textarea id="rejectReason-@student.Id" class="form-control mt-2" placeholder="Enter rejection reason"></textarea>
+											</div>
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+
+					</div>
+
+					<div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "programs" ? "show active" : "")" id="programs">
+						<h3>Manage Exchange Programs</h3>
+						<p>Create and manage exchange programs below.</p>
+
+						<!-- Display Existing Programs -->
+						<h4>Existing Programs</h4>
+						<table class="table table-bordered">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>Description</th>
+									<th>Deadline</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var program in Model.Programs)
+								{
+									<tr>
+										<td>@program.Name</td>
+										<td>@program.Description</td>
+										<td>@program.Deadline</td>
+										<td>
+											<form method="post" asp-page-handler="DeleteProgram" class="d-inline">
+												<input type="hidden" name="programId" value="@program.Id" />
+												<button type="submit" class="btn btn-danger btn-sm">Delete</button>
+											</form>
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+
+						<!-- Create New Program -->
+						<h4>Create New Program</h4>
+						<form method="post" asp-page-handler="CreateProgram">
+							<div class="mb-3">
+								<label for="ProgramName" class="form-label">Program Name</label>
+								<input type="text" class="form-control" id="ProgramName" name="ProgramName" required />
+							</div>
+							<div class="mb-3">
+								<label for="ProgramDescription" class="form-label">Program Description</label>
+								<textarea class="form-control" id="ProgramDescription" name="ProgramDescription" rows="3" required></textarea>
+							</div>
+							<div class="mb-3">
+								<label for="ProgramDeadline" class="form-label">Application Deadline</label>
+								<input type="date" class="form-control" id="ProgramDeadline" name="ProgramDeadline" required />
+							</div>
+							<button type="submit" class="btn btn-primary">Create Program</button>
+						</form>
+					</div>
+
+
+					<!-- Email Tab -->
+					<div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "email" ? "show active" : "")" id="email">
+						<h3>Change Email</h3>
+						<form method="post" asp-page-handler="ChangeEmail">
+							<div class="mb-3">
+								<label for="CurrentEmail" class="form-label">Current Email</label>
+								<input type="email" class="form-control" id="CurrentEmail" name="CurrentEmail" required />
+							</div>
+							<div class="mb-3">
+								<label for="NewEmail" class="form-label">New Email</label>
+								<input type="email" class="form-control" id="NewEmail" name="NewEmail" required />
+							</div>
+							<div class="mb-3">
+								<label for="ConfirmEmail" class="form-label">Confirm New Email</label>
+								<input type="email" class="form-control" id="ConfirmEmail" name="ConfirmEmail" required />
+							</div>
+							<button type="submit" class="btn btn-primary">Update Email</button>
+						</form>
+					</div>
+
+					<!-- Password Tab -->
+					<div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "password" ? "show active" : "")" id="password">
+						<h3>Change Password</h3>
+						<form method="post" asp-page-handler="ChangePassword">
+							<div class="mb-3">
+								<label for="OldPassword" class="form-label">Old Password</label>
+								<input type="password" class="form-control" id="OldPassword" name="OldPassword" required />
+							</div>
+							<div class="mb-3">
+								<label for="NewPassword" class="form-label">New Password</label>
+								<input type="password" class="form-control" id="NewPassword" name="NewPassword" required />
+							</div>
+							<div class="mb-3">
+								<label for="ConfirmPassword" class="form-label">Confirm New Password</label>
+								<input type="password" class="form-control" id="ConfirmPassword" name="ConfirmPassword" required />
+							</div>
+							<button type="submit" class="btn btn-primary">Update Password</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		function clearMessages() {
+			const alerts = document.querySelectorAll('.alert');
+			alerts.forEach(alert => alert.remove());
+		}
+
+		function toggleDetails(button) {
+			const detailsRow = button.closest('tr').nextElementSibling;
+			if (detailsRow.classList.contains('d-none')) {
+				detailsRow.classList.remove('d-none');
+				button.textContent = 'View Less';
+			} else {
+				detailsRow.classList.add('d-none');
+				button.textContent = 'View More';
+			}
+		}
+
+		// Placeholder for Approve Student
+		function approveStudent(studentId) {
+			alert(`Student ${studentId} approved.`);
+		}
+
+		// Placeholder for Reject Student
+		function rejectStudent(studentId) {
+			const reason = document.getElementById(`rejectReason-${studentId}`).value;
+			if (!reason.trim()) {
+				alert("Please provide a rejection reason.");
+				return;
+			}
+			alert(`Student ${studentId} rejected with reason: ${reason}`);
+		}
+
+		// Placeholder for Generating Reports
+		function generateApplicantsReport() {
+			alert("Generating applicants report...");
+		}
+
+		function generateApplicationsReport() {
+			alert("Generating applications report...");
+		}
+	</script>
 </body>
 </html>
-
