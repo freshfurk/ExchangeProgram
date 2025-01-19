@@ -28,9 +28,19 @@ namespace ExchangeProgram.Pages
         [BindProperty]
         public string Password { get; set; }
 
+        [BindProperty]
+        public string ConfirmPassword { get; set; }
+
         public IActionResult OnPostRegister()
         {
             //if (!ModelState.IsValid) return Page();
+
+            // Prüfen, ob die Passwörter übereinstimmen
+            if (Password != ConfirmPassword)
+            {
+                TempData["ErrorMessage"] = "Passwords do not match.";
+                return RedirectToPage();
+            }
 
             // Passwort verschlüsseln
             using (var sha256 = SHA256.Create())
@@ -55,7 +65,7 @@ namespace ExchangeProgram.Pages
             if (user == null)
             {
                 TempData["ErrorMessage"] = "User not found.";
-                return RedirectToPage("/Index");
+                return RedirectToPage("/LoginRegister");
             }
 
             using (var sha256 = SHA256.Create())
@@ -66,7 +76,7 @@ namespace ExchangeProgram.Pages
                 if (user.PasswordHash != hashedPassword)
                 {
                     TempData["ErrorMessage"] = "Invalid password.";
-                    return RedirectToPage("/Index");
+                    return RedirectToPage("/LoginRegister");
                 }
             }
 
@@ -74,7 +84,7 @@ namespace ExchangeProgram.Pages
             // Weiterleitung basierend auf der Rolle
             if (user.isStudent)
             {
-                return RedirectToPage("/Dashboard", new { id = user.Id });
+                return RedirectToPage("/Index", new { id = user.Id });
             }
             else
             {

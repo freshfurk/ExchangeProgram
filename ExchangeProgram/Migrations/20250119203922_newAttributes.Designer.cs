@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExchangeProgram.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250116202611_AddExchangePrograms")]
-    partial class AddExchangePrograms
+    [Migration("20250119203922_newAttributes")]
+    partial class newAttributes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -63,8 +63,8 @@ namespace ExchangeProgram.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("Deadline")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly?>("Deadline")
+                        .HasColumnType("date");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -88,8 +88,8 @@ namespace ExchangeProgram.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("BirthDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly?>("BirthDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("City")
                         .HasColumnType("nvarchar(max)");
@@ -108,6 +108,9 @@ namespace ExchangeProgram.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Gender")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("HouseNumber")
                         .HasColumnType("nvarchar(max)");
 
@@ -116,6 +119,9 @@ namespace ExchangeProgram.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MatriculationNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nationality")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")

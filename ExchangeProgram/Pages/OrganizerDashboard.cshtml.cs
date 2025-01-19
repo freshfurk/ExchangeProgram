@@ -48,7 +48,7 @@ namespace ExchangeProgram.Pages
         public string ProgramDescription { get; set; }
 
         [BindProperty]
-        public DateTime ProgramDeadline { get; set; }
+        public DateOnly ProgramDeadline { get; set; }
 
         public IActionResult OnGet()
         {
@@ -172,7 +172,7 @@ namespace ExchangeProgram.Pages
 
         public IActionResult OnPostCreateProgram()
         {
-            if (string.IsNullOrWhiteSpace(ProgramName) || string.IsNullOrWhiteSpace(ProgramDescription) || ProgramDeadline == default(DateTime))
+            if (string.IsNullOrWhiteSpace(ProgramName) || string.IsNullOrWhiteSpace(ProgramDescription) || ProgramDeadline == default(DateOnly))
             {
                 TempData["ErrorMessage"] = "All fields are required.";
                 TempData["ActiveTab"] = "programs";
