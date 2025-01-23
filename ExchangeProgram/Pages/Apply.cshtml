@@ -203,7 +203,7 @@
 					</div>
 					<div class="mb-3">
 						<label for="BirthDate" class="form-label">Birth Date</label>
-						<input type="date" class="form-control" id="BirthDate" name="BirthDate" required>
+						<input type="date" class="form-control" id="BirthDate" name="BirthDate" value="@Model.BirthDate" required>
 						<small class="text-danger" id="BirthDateError" style="display: none;">Birth date is required.</small>
 					</div>
 					<div class="mb-3">
@@ -220,7 +220,7 @@
 					</div>
 					<div class="mb-3">
 						<label for="Nationality" class="form-label">Nationality</label>
-						<input type="text" class="form-control" id="Nationality" name="Nationality" required>
+						<input type="text" class="form-control" id="Nationality" name="Nationality" value="@Model.Nationality" required>
 						<small class="text-danger" id="NationalityError" style="display: none;">Nationality is required.</small>
 					</div>
 					<div class="d-flex justify-content-end">
@@ -233,27 +233,27 @@
 					<p class="text-center">Fill in your Contact Information</p>
 					<div class="mb-3">
 						<label for="Address" class="form-label">Address</label>
-						<input type="text" class="form-control" id="Address" name="Address" required>
+						<input type="text" class="form-control" id="Address" name="Address" value="@Model.Address" required>
 						<small class="text-danger" id="AddressError" style="display: none;">Address is required.</small>
 					</div>
 					<div class="mb-3">
 						<label for="HouseNumber" class="form-label">House Number</label>
-						<input type="number" class="form-control" id="HouseNumber" name="HouseNumber" required>
+						<input type="number" class="form-control" id="HouseNumber" name="HouseNumber" value="@Model.HouseNumber" required>
 						<small class="text-danger" id="HouseNumberError" style="display: none;">House number is required.</small>
 					</div>
 					<div class="mb-3">
 						<label for="City" class="form-label">City</label>
-						<input type="text" class="form-control" id="City" name="City" required>
+						<input type="text" class="form-control" id="City" name="City" value="@Model.City" required>
 						<small class="text-danger" id="CityError" style="display: none;">City is required.</small>
 					</div>
 					<div class="mb-3">
 						<label for="Country" class="form-label">Country</label>
-						<input type="text" class="form-control" id="Country" name="Country" required>
+						<input type="text" class="form-control" id="Country" name="Country" value="@Model.Country" required>
 						<small class="text-danger" id="CountryError" style="display: none;">Country is required.</small>
 					</div>
 					<div class="mb-3">
 						<label for="PhoneNumber" class="form-label">Phone Number</label>
-						<input type="text" class="form-control" id="PhoneNumber" name="PhoneNumber" required>
+						<input type="text" class="form-control" id="PhoneNumber" name="PhoneNumber" value="@Model.PhoneNumber" required>
 						<small class="text-danger" id="PhoneNumberError" style="display: none;">Phone number is required.</small>
 					</div>
 					<div class="mb-3">
@@ -272,7 +272,7 @@
 					<p class="text-center">Fill in your Academic Information</p>
 					<div class="mb-3">
 						<label for="UniversityName" class="form-label">University Name</label>
-						<input type="text" class="form-control" id="UniversityName" name="UniversityName" required>
+						<input type="text" class="form-control" id="UniversityName" name="UniversityName" value="@Model.UniversityName" required>
 						<small class="text-danger" id="UniversityNameError" style="display: none;">University name is required.</small>
 					</div>
 					<div class="mb-3">
@@ -287,12 +287,12 @@
 					</div>
 					<div class="mb-3">
 						<label for="StudyField" class="form-label">Study Field</label>
-						<input type="text" class="form-control" id="StudyField" name="StudyField" required>
+						<input type="text" class="form-control" id="StudyField" name="StudyField" value="@Model.StudyField" required>
 						<small class="text-danger" id="StudyFieldError" style="display: none;">Study field is required.</small>
 					</div>
 					<div class="mb-3">
 						<label for="MatriculationNumber" class="form-label">Matriculation Number</label>
-						<input type="number" class="form-control" id="MatriculationNumber" name="MatriculationNumber" required>
+						<input type="number" class="form-control" id="MatriculationNumber" name="MatriculationNumber" value="@Model.MatriculationNumber" required>
 						<small class="text-danger" id="MatriculationNumberError" style="display: none;">Matriculation number is required.</small>
 					</div>
 					<div class="d-flex justify-content-between">
@@ -348,7 +348,11 @@
 							foreach (var program in Model.Programs)
 							{
 								<li class="list-group-item d-flex align-items-center">
-									<input type="radio" class="form-check-input me-3" id="Program-@program.Id" name="SelectedProgram" value="@program.Id" required>
+									<input type="radio" class="form-check-input me-3" id="Program-@program.Id" name="SelectedProgram" value="@program.Id"
+									@if (Model.SelectedProgram == program.Id)
+									{
+										<text>checked</text>
+									} required>
 									<div class="flex-grow-1">
 										<h5 class="mb-1">@program.Name</h5>
 										<p class="mb-1">@program.Description</p>
@@ -374,7 +378,24 @@
 		<script>
 			let currentStep = 1;
 
-						function validateStep1() {
+			document.addEventListener("DOMContentLoaded", function () {
+				// Gender-Wert aus dem Server abrufen
+				const genderValue = '@Model.Gender';
+				const degreeValue = '@Model.Degree';
+
+				// Dropdown-Feld setzen, falls ein Wert vorhanden ist
+				if (genderValue) {
+					const genderSelect = document.getElementById("Gender");
+					genderSelect.value = genderValue;
+				}
+
+				if (degreeValue) {
+					const degreeSelect = document.getElementById("Degree");
+					degreeSelect.value = degreeValue;
+				}
+			});
+
+			function validateStep1() {
 				let isValid = true;
 
 				const firstName = document.getElementById('FirstName').value.trim();

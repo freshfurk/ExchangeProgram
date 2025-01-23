@@ -28,16 +28,38 @@ namespace ExchangeProgram.Pages
 
         public List<Document> Documents { get; set; }
 
-        public IActionResult OnGet(int id)
+        [BindProperty]
+        public string ApplicationStatus { get; set; }
+
+        [BindProperty]
+        public int? StudentId { get; set; }
+
+        public IActionResult OnGet()
         {
-            if (id == 0)
+            // Prüfen, ob die ID in der URL vorhanden ist
+            if (!Request.Query.ContainsKey("id") || !int.TryParse(Request.Query["id"], out var studentId))
             {
-                TempData["ErrorMessage"] = "Invalid user ID.";
-                return RedirectToPage("/Index");
+                TempData["ErrorMessage"] = "You must be logged in to view your dashboard.";
+                return RedirectToPage("/LoginRegister");
+            }
+
+            StudentId = studentId;
+
+            // Bewerbung des Studenten abrufen
+            var application = _context.Applications
+                .FirstOrDefault(a => a.StudentId == studentId);
+
+            if (application != null)
+            {
+                ApplicationStatus = application.Status; // Status der Bewerbung abrufen
+            }
+            else
+            {
+                ApplicationStatus = "No application found.";
             }
 
             // Benutzer laden und TempData setzen
-            Student = _context.Students.FirstOrDefault(s => s.Id == id);
+            Student = _context.Students.FirstOrDefault(s => s.Id == StudentId);
             if (Student == null)
             {
                 TempData["ErrorMessage"] = "User not found.";
@@ -48,12 +70,12 @@ namespace ExchangeProgram.Pages
             if (!Student.isStudent)
             {
                 //TempData["ErrorMessage"] = "Unauthorized access.";
-                return RedirectToPage("/OrganizerDashboard", new { id });
+                return RedirectToPage("/OrganizerDashboard", new { StudentId });
             }
 
-            Documents = _context.Documents.Where(d => d.StudentId == id).ToList();
+            Documents = _context.Documents.Where(d => d.StudentId == StudentId).ToList();
 
-            TempData["UserId"] = id; // Id in TempData speichern
+            TempData["UserId"] = StudentId; // Id in TempData speichern
             return Page();
         }
 

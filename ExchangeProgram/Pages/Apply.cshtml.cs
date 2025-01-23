@@ -108,9 +108,48 @@ namespace ExchangeProgram.Pages
                 return RedirectToPage("/LoginRegister");
             }
 
-            FirstName = student.FirstName;
-            LastName = student.LastName;
-            ContactEmail = student.Email;
+            // Vorausfüllen der Felder mit den letzten Bewerbungsdaten (falls vorhanden)
+            var application = student.Applications?.OrderByDescending(a => a.ApplicationDate).FirstOrDefault();
+            if (application != null)
+            {
+                FirstName = application.FirstName;
+                LastName = application.LastName;
+                BirthDate = application.BirthDate;
+                Gender = application.Gender;
+                Nationality = application.Nationality;
+                ContactEmail = application.ContactEmail;
+                PhoneNumber = application.PhoneNumber;
+                Address = application.Address;
+                HouseNumber = application.HouseNumber;
+                City = application.City;
+                Country = application.Country;
+                UniversityName = application.UniversityName;
+                Degree = application.Degree;
+                StudyField = application.StudyField;
+                MatriculationNumber = application.MatriculationNumber;
+                SelectedProgram = (int)application.ProgramId;
+
+                // Dokumente aus der letzten Bewerbung laden
+                if (application.Documents != null)
+                {
+                    // Beispiel: Laden der Dateinamen für die Anzeige
+                    ViewData["CV"] = application.Documents.FirstOrDefault(d => d.FileType == "CV")?.FileName;
+                    ViewData["Transcript"] = application.Documents.FirstOrDefault(d => d.FileType == "Transcript")?.FileName;
+                    ViewData["MotivationLetter"] = application.Documents.FirstOrDefault(d => d.FileType == "Motivation Letter")?.FileName;
+                    ViewData["LanguageCertificate"] = application.Documents.FirstOrDefault(d => d.FileType == "Language Certificate")?.FileName;
+                    ViewData["SupportingDocuments"] = application.Documents
+                        .Where(d => d.FileType == "Supporting Document")
+                        .Select(d => d.FileName)
+                        .ToList();
+                }
+            }
+            else
+            {
+                // Felder leer lassen, wenn keine Bewerbung existiert
+                FirstName = student.FirstName;
+                LastName = student.LastName;
+                ContactEmail = student.Email;
+            }
 
             return Page();
         }
@@ -132,33 +171,59 @@ namespace ExchangeProgram.Pages
                 return RedirectToPage("/LoginRegister");
             }
 
-            // Create or update the application
-            var application = student.Applications?.FirstOrDefault(a => a.ProgramId == SelectedProgram);
-            application = new Application
+            // Check if the student already has an application
+            var application = student.Applications?.FirstOrDefault();
+            if (application == null)
             {
-                FirstName = FirstName,
-                LastName = LastName,
-                BirthDate = BirthDate,
-                Gender = Gender,
-                Nationality = Nationality,
-                ContactEmail = ContactEmail,
-                PhoneNumber = PhoneNumber,
-                Address = Address,
-                HouseNumber = HouseNumber,
-                City = City,
-                Country = Country,
-                UniversityName = UniversityName,
-                Degree = Degree,
-                StudyField = StudyField,
-                MatriculationNumber = MatriculationNumber,
-                ProgramId = SelectedProgram,
-                StudentId = studentId,
-                ApplicationDate = DateTime.Now,
-                Status = "Pending"
-            };
+                // Create a new application
+                application = new Application
+                {
+                    FirstName = FirstName,
+                    LastName = LastName,
+                    BirthDate = BirthDate,
+                    Gender = Gender,
+                    Nationality = Nationality,
+                    ContactEmail = ContactEmail,
+                    PhoneNumber = PhoneNumber,
+                    Address = Address,
+                    HouseNumber = HouseNumber,
+                    City = City,
+                    Country = Country,
+                    UniversityName = UniversityName,
+                    Degree = Degree,
+                    StudyField = StudyField,
+                    MatriculationNumber = MatriculationNumber,
+                    ProgramId = SelectedProgram,
+                    StudentId = studentId,
+                    ApplicationDate = DateTime.Now,
+                    Status = "Pending"
+                };
 
-            _context.Applications.Add(application);
-            _context.SaveChanges(); // Save here to generate ApplicationId
+                _context.Applications.Add(application);
+            }
+            else
+            {
+                // Update the existing application
+                application.FirstName = FirstName;
+                application.LastName = LastName;
+                application.BirthDate = BirthDate;
+                application.Gender = Gender;
+                application.Nationality = Nationality;
+                application.ContactEmail = ContactEmail;
+                application.PhoneNumber = PhoneNumber;
+                application.Address = Address;
+                application.HouseNumber = HouseNumber;
+                application.City = City;
+                application.Country = Country;
+                application.UniversityName = UniversityName;
+                application.Degree = Degree;
+                application.StudyField = StudyField;
+                application.MatriculationNumber = MatriculationNumber;
+                application.ProgramId = SelectedProgram;
+                application.ApplicationDate = DateTime.Now; // Update the application date to reflect changes
+            }
+
+            _context.SaveChanges(); // Save changes to ensure ApplicationId is generated
 
             // Handle document uploads and associate them with the application
             var documents = new List<Document>();
@@ -178,13 +243,20 @@ namespace ExchangeProgram.Pages
 
             if (documents.Any())
             {
+                // Remove old documents associated with this application
+                var existingDocuments = _context.Documents.Where(d => d.ApplicationId == application.Id).ToList();
+                _context.Documents.RemoveRange(existingDocuments);
+
+                // Add new documents
                 _context.Documents.AddRange(documents);
-                _context.SaveChanges();
             }
+
+            _context.SaveChanges();
 
             TempData["SuccessMessage"] = "Your application has been submitted successfully!";
             return RedirectToPage("/Index", new { id = studentId });
         }
+
 
         private Document CreateDocument(IFormFile file, string type, int studentId, int applicationId)
         {

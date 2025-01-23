@@ -99,6 +99,23 @@
 			<span id="notificationMessage"></span>
 		</div>
 
+		<!-- Bewerbungsstatus -->
+		<div class="row mb-4">
+			<div class="col-md-12">
+				<h3>Your Application Status</h3>
+				@if (string.IsNullOrEmpty(Model.ApplicationStatus) || Model.ApplicationStatus == "No application found.")
+				{
+					<p class="text-danger">You have not submitted any applications yet.</p>
+				}
+				else
+				{
+					<p class="text-success">
+						Your current application status: <strong>@Model.ApplicationStatus</strong>
+					</p>
+				}
+			</div>
+		</div>
+
 		<h2>Manage your account</h2>
 		<p>Change your account settings</p>
 
