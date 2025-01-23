@@ -47,7 +47,7 @@ namespace ExchangeProgram.Pages
             // Zugriff nur für Studenten
             if (!Student.isStudent)
             {
-                TempData["ErrorMessage"] = "Unauthorized access.";
+                //TempData["ErrorMessage"] = "Unauthorized access.";
                 return RedirectToPage("/OrganizerDashboard", new { id });
             }
 
@@ -57,136 +57,149 @@ namespace ExchangeProgram.Pages
             return Page();
         }
 
-        public IActionResult OnPostSaveProfile(IFormFile ProfilePicture)
+        public IActionResult OnGetApply(int? id)
         {
-            // Id aus TempData abrufen
-            if (!TempData.ContainsKey("UserId") || Convert.ToInt32(TempData["UserId"]) == 0)
+            // Prüfen, ob eine ID in der URL vorhanden ist (Prüft auf Login-Status)
+            if (!id.HasValue)
             {
-                TempData["ErrorMessage"] = "User ID not found.";
-                return RedirectToPage("/Index");
+                // Benutzer ist nicht eingeloggt, Weiterleitung zur Login-Seite
+                //TempData["ErrorMessage"] = "You must be logged in to apply.";
+                return RedirectToPage("/LoginRegister");
             }
 
-            int id = Convert.ToInt32(TempData["UserId"]);
-
-            var existingStudent = _context.Students.FirstOrDefault(s => s.Id == id);
-            if (existingStudent == null)
-            {
-                TempData["ErrorMessage"] = "User not found in the database.";
-                return RedirectToPage("/Index");
-            }
-
-            // Profildaten aktualisieren
-            existingStudent.FirstName = Student.FirstName;
-            existingStudent.LastName = Student.LastName;
-            existingStudent.BirthDate = Student.BirthDate;
-            existingStudent.Address = Student.Address;
-            existingStudent.HouseNumber = Student.HouseNumber;
-            existingStudent.City = Student.City;
-            existingStudent.Country = Student.Country;
-            existingStudent.PhoneNumber = Student.PhoneNumber;
-            existingStudent.MatriculationNumber = Student.MatriculationNumber;
-            existingStudent.UniversityName = Student.UniversityName;
-            existingStudent.StudyField = Student.StudyField;
-            existingStudent.Degree = Student.Degree;
-
-            if (ProfilePicture != null && ProfilePicture.Length > 0)
-            {
-                using var memoryStream = new MemoryStream();
-                ProfilePicture.CopyTo(memoryStream);
-
-                // Optional: Bildvalidierung hinzufügen
-                if (ProfilePicture.ContentType == "image/jpeg" || ProfilePicture.ContentType == "image/png")
-                {
-                    existingStudent.ProfilePicture = memoryStream.ToArray();
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = "Invalid image format. Only JPEG and PNG are allowed.";
-                    return RedirectToPage("/Dashboard", new { id });
-                }
-            }
-
-            _context.SaveChanges();
-            TempData["SuccessMessage"] = "Profile updated successfully!";
-
-            return RedirectToPage("/Dashboard", new { id });
+            return RedirectToPage("/Apply", new { id });
         }
 
-        public IActionResult OnPostUploadDocument()
-        {
-            if (!TempData.ContainsKey("UserId") || Convert.ToInt32(TempData["UserId"]) == 0)
-            {
-                TempData["ErrorMessage"] = "User ID not found.";
-                return RedirectToPage("/Index");
-            }
+        //public IActionResult OnPostSaveProfile(IFormFile ProfilePicture)
+        //{
+        //    // Id aus TempData abrufen
+        //    if (!TempData.ContainsKey("UserId") || Convert.ToInt32(TempData["UserId"]) == 0)
+        //    {
+        //        TempData["ErrorMessage"] = "User ID not found.";
+        //        return RedirectToPage("/Index");
+        //    }
 
-            int id = Convert.ToInt32(TempData["UserId"]);
+        //    int id = Convert.ToInt32(TempData["UserId"]);
 
-            var student = _context.Students.FirstOrDefault(s => s.Id == id);
-            if (student == null)
-            {
-                TempData["ErrorMessage"] = "Student not found.";
-                return RedirectToPage("/Index");
-            }
+        //    var existingStudent = _context.Students.FirstOrDefault(s => s.Id == id);
+        //    if (existingStudent == null)
+        //    {
+        //        TempData["ErrorMessage"] = "User not found in the database.";
+        //        return RedirectToPage("/Index");
+        //    }
 
-            if (File != null)
-            {
-                using var memoryStream = new MemoryStream();
-                File.CopyTo(memoryStream);
-                var fileData = memoryStream.ToArray();
+        //    // Profildaten aktualisieren
+        //    //existingStudent.FirstName = Student.FirstName;
+        //    //existingStudent.LastName = Student.LastName;
+        //    //existingStudent.BirthDate = Student.BirthDate;
+        //    //existingStudent.Address = Student.Address;
+        //    //existingStudent.HouseNumber = Student.HouseNumber;
+        //    //existingStudent.City = Student.City;
+        //    //existingStudent.Country = Student.Country;
+        //    //existingStudent.PhoneNumber = Student.PhoneNumber;
+        //    //existingStudent.MatriculationNumber = Student.MatriculationNumber;
+        //    //existingStudent.UniversityName = Student.UniversityName;
+        //    //existingStudent.StudyField = Student.StudyField;
+        //    //existingStudent.Degree = Student.Degree;
 
-                var document = new Document
-                {
-                    FileName = File.FileName,
-                    FileType = FileType,
-                    FileData = fileData,
-                    StudentId = id // Sicherstellen, dass die ID existiert
-                };
+        //    //if (ProfilePicture != null && ProfilePicture.Length > 0)
+        //    //{
+        //    //    using var memoryStream = new MemoryStream();
+        //    //    ProfilePicture.CopyTo(memoryStream);
 
-                _context.Documents.Add(document);
-                _context.SaveChanges();
+        //    //    // Optional: Bildvalidierung hinzufügen
+        //    //    if (ProfilePicture.ContentType == "image/jpeg" || ProfilePicture.ContentType == "image/png")
+        //    //    {
+        //    //        existingStudent.ProfilePicture = memoryStream.ToArray();
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        TempData["ErrorMessage"] = "Invalid image format. Only JPEG and PNG are allowed.";
+        //    //        return RedirectToPage("/Dashboard", new { id });
+        //    //    }
+        //    //}
 
-                TempData["SuccessMessage"] = "Document uploaded successfully!";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "No file selected.";
-            }
+        //    _context.SaveChanges();
+        //    TempData["SuccessMessage"] = "Profile updated successfully!";
 
-            TempData["ActiveTab"] = "documents"; // Dokumenten-Tab aktiv halten
-            return RedirectToPage("/Dashboard", new { id });
-        }
+        //    return RedirectToPage("/Dashboard", new { id });
+        //}
 
-        public IActionResult OnGetDownloadDocument(int documentId)
-        {
-            var document = _context.Documents.FirstOrDefault(d => d.Id == documentId);
-            if (document != null)
-            {
-                return File(document.FileData, "application/octet-stream", document.FileName);
-            }
-            return NotFound();
-        }
+        //public IActionResult OnPostUploadDocument()
+        //{
+        //    if (!TempData.ContainsKey("UserId") || Convert.ToInt32(TempData["UserId"]) == 0)
+        //    {
+        //        TempData["ErrorMessage"] = "User ID not found.";
+        //        return RedirectToPage("/Index");
+        //    }
 
-        public IActionResult OnPostDeleteDocument(int documentId)
-        {
-            if (!TempData.ContainsKey("UserId") || Convert.ToInt32(TempData["UserId"]) == 0)
-            {
-                TempData["ErrorMessage"] = "User ID not found.";
-                return RedirectToPage("/Index");
-            }
+        //    int id = Convert.ToInt32(TempData["UserId"]);
 
-            int id = Convert.ToInt32(TempData["UserId"]);
+        //    var student = _context.Students.FirstOrDefault(s => s.Id == id);
+        //    if (student == null)
+        //    {
+        //        TempData["ErrorMessage"] = "Student not found.";
+        //        return RedirectToPage("/Index");
+        //    }
 
-            var document = _context.Documents.FirstOrDefault(d => d.Id == documentId);
-            if (document != null)
-            {
-                _context.Documents.Remove(document);
-                _context.SaveChanges();
-            }
+        //    if (File != null)
+        //    {
+        //        using var memoryStream = new MemoryStream();
+        //        File.CopyTo(memoryStream);
+        //        var fileData = memoryStream.ToArray();
 
-            TempData["ActiveTab"] = "documents"; // Dokumenten-Tab aktiv halten
-            return RedirectToPage("/Dashboard", new { id });
-        }
+        //        var document = new Document
+        //        {
+        //            FileName = File.FileName,
+        //            FileType = FileType,
+        //            FileData = fileData,
+        //            StudentId = id // Sicherstellen, dass die ID existiert
+        //        };
+
+        //        _context.Documents.Add(document);
+        //        _context.SaveChanges();
+
+        //        TempData["SuccessMessage"] = "Document uploaded successfully!";
+        //    }
+        //    else
+        //    {
+        //        TempData["ErrorMessage"] = "No file selected.";
+        //    }
+
+        //    TempData["ActiveTab"] = "documents"; // Dokumenten-Tab aktiv halten
+        //    return RedirectToPage("/Dashboard", new { id });
+        //}
+
+        //public IActionResult OnGetDownloadDocument(int documentId)
+        //{
+        //    var document = _context.Documents.FirstOrDefault(d => d.Id == documentId);
+        //    if (document != null)
+        //    {
+        //        return File(document.FileData, "application/octet-stream", document.FileName);
+        //    }
+        //    return NotFound();
+        //}
+
+        //public IActionResult OnPostDeleteDocument(int documentId)
+        //{
+        //    if (!TempData.ContainsKey("UserId") || Convert.ToInt32(TempData["UserId"]) == 0)
+        //    {
+        //        TempData["ErrorMessage"] = "User ID not found.";
+        //        return RedirectToPage("/Index");
+        //    }
+
+        //    int id = Convert.ToInt32(TempData["UserId"]);
+
+        //    var document = _context.Documents.FirstOrDefault(d => d.Id == documentId);
+        //    if (document != null)
+        //    {
+        //        _context.Documents.Remove(document);
+        //        _context.SaveChanges();
+        //    }
+
+        //    TempData["ActiveTab"] = "documents"; // Dokumenten-Tab aktiv halten
+        //    return RedirectToPage("/Dashboard", new { id });
+        //}
 
         public IActionResult OnPostChangeEmail(string CurrentEmail, string NewEmail, string ConfirmEmail)
         {

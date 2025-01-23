@@ -48,7 +48,7 @@ namespace ExchangeProgram.Pages
         public string ProgramDescription { get; set; }
 
         [BindProperty]
-        public DateOnly ProgramDeadline { get; set; }
+        public DateTime ProgramDeadline { get; set; }
 
         public IActionResult OnGet()
         {
@@ -92,7 +92,7 @@ namespace ExchangeProgram.Pages
         public IActionResult OnPostChangePassword()
         {
             // Simulierte Organizer-Email-Adresse für Passwortänderung
-            var organizer = _context.Students.FirstOrDefault(s => !s.isStudent && s.Email == CurrentEmail);
+            var organizer = _context.Students.FirstOrDefault(s => !s.isStudent);
             if (organizer == null)
             {
                 TempData["ErrorMessage"] = "Invalid organizer.";
@@ -133,46 +133,46 @@ namespace ExchangeProgram.Pages
             return RedirectToPage();
         }
 
-        public IActionResult OnPostDeleteStudent(int studentId)
-        {
-            var student = _context.Students.FirstOrDefault(s => s.Id == studentId && s.isStudent);
-            if (student != null)
-            {
-                // Löschen der zugehörigen Dokumente
-                var documents = _context.Documents.Where(d => d.StudentId == studentId).ToList();
-                _context.Documents.RemoveRange(documents);
+        //public IActionResult OnPostDeleteStudent(int studentId)
+        //{
+        //    var student = _context.Students.FirstOrDefault(s => s.Id == studentId && s.isStudent);
+        //    if (student != null)
+        //    {
+        //        // Löschen der zugehörigen Dokumente
+        //        var documents = _context.Documents.Where(d => d.StudentId == studentId).ToList();
+        //        _context.Documents.RemoveRange(documents);
 
-                // Löschen des Studenten
-                _context.Students.Remove(student);
-                _context.SaveChanges();
+        //        // Löschen des Studenten
+        //        _context.Students.Remove(student);
+        //        _context.SaveChanges();
 
-                TempData["SuccessMessage"] = "Student and associated documents deleted successfully!";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Student not found.";
-            }
+        //        TempData["SuccessMessage"] = "Student and associated documents deleted successfully!";
+        //    }
+        //    else
+        //    {
+        //        TempData["ErrorMessage"] = "Student not found.";
+        //    }
 
-            TempData["ActiveTab"] = "students";
-            return RedirectToPage();
-        }
+        //    TempData["ActiveTab"] = "students";
+        //    return RedirectToPage();
+        //}
 
-        public IActionResult OnGetDownloadDocument(int documentId)
-        {
-            var document = _context.Documents.FirstOrDefault(d => d.Id == documentId);
-            if (document != null)
-            {
-                return File(document.FileData, "application/octet-stream", document.FileName);
-            }
+        //public IActionResult OnGetDownloadDocument(int documentId)
+        //{
+        //    var document = _context.Documents.FirstOrDefault(d => d.Id == documentId);
+        //    if (document != null)
+        //    {
+        //        return File(document.FileData, "application/octet-stream", document.FileName);
+        //    }
 
-            TempData["ErrorMessage"] = "Document not found.";
-            TempData["ActiveTab"] = "students";
-            return RedirectToPage();
-        }
+        //    TempData["ErrorMessage"] = "Document not found.";
+        //    TempData["ActiveTab"] = "students";
+        //    return RedirectToPage();
+        //}
 
         public IActionResult OnPostCreateProgram()
         {
-            if (string.IsNullOrWhiteSpace(ProgramName) || string.IsNullOrWhiteSpace(ProgramDescription) || ProgramDeadline == default(DateOnly))
+            if (string.IsNullOrWhiteSpace(ProgramName) || string.IsNullOrWhiteSpace(ProgramDescription) || ProgramDeadline == default(DateTime))
             {
                 TempData["ErrorMessage"] = "All fields are required.";
                 TempData["ActiveTab"] = "programs";

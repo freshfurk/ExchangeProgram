@@ -27,36 +27,86 @@
 		.d-none {
 			display: none;
 		}
+
+		#notification {
+			position: fixed;
+			top: 20%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			min-width: 300px;
+			max-width: 500px;
+			padding: 15px;
+			/* font-size: 1rem;
+							font-weight: bold; */
+			text-align: center;
+			z-index: 1050;
+			border-radius: 8px;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			opacity: 0;
+			transition: opacity 0.3s ease, transform 0.3s ease;
+		}
+
+			#notification.show {
+				opacity: 1;
+				transform: translate(-50%, -20%);
+			}
 	</style>
 </head>
 <body>
-	<!-- Navbar -->
-	<nav class="navbar navbar-light bg-light">
+	<!-- Navigation -->
+	<nav class="navbar navbar-expand-lg" style="background-color: rgb(3, 77, 148);">
 		<div class="container-fluid">
-			<a class="navbar-brand" href="#">ExchangeProgram</a>
-			<div>
-				<span class="navbar-text me-3">Hello, Organizer!</span>
-				<a class="btn btn-outline-danger btn-sm" href="/Logout">Logout</a>
+			<a class="navbar-brand text-white" href="#">
+				@* Uni Logo *@
+				@* <img src="/pictures/Uni-duisburg-essen-logo.jpg" alt="GESCO Logo" height="30" class="d-inline-block align-text-top"> *@
+				GESCO
+			</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon" style="filter: invert(1);"></span> <!-- Toggler-Icon invertieren, damit es sichtbar bleibt -->
+			</button>
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="navbar-nav ms-auto">
+					<li class="nav-item">
+						<a asp-page="/Index" asp-route-id="@Request.Query["id"]" class="nav-link text-white">Home</a>
+					</li>
+					<li class="nav-item">
+						<a asp-page="/FAQ" asp-route-id="@Request.Query["id"]" class="nav-link text-white">FAQ</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link text-white" href="https://www.uni-due.de/">About Us</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link text-white btn btn-outline-danger btn-sm" href="/Logout">Logout</a>
+					</li>
+				</ul>
 			</div>
 		</div>
 	</nav>
 
+	@if (TempData["SuccessMessage"] != null)
+	{
+		<script>
+			window.onload = function () {
+				showNotification('@TempData["SuccessMessage"]', 'success');
+			};
+		</script>
+	}
+
+	@if (TempData["ErrorMessage"] != null)
+	{
+		<script>
+			window.onload = function () {
+				showNotification('@TempData["ErrorMessage"]', 'danger');
+			};
+		</script>
+	}
+
+	<div id="notification" class="alert alert-success" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 1050;">
+		<span id="notificationMessage"></span>
+	</div>
+
 	<!-- Content -->
 	<div class="container mt-4">
-		@if (TempData["SuccessMessage"] != null)
-		{
-			<div class="alert alert-success">
-				@TempData["SuccessMessage"]
-			</div>
-		}
-
-		@if (TempData["ErrorMessage"] != null)
-		{
-			<div class="alert alert-danger">
-				@TempData["ErrorMessage"]
-			</div>
-		}
-
 		<h2>Manage Students and Your Account</h2>
 		<p>Use the tabs below to manage your account and oversee student information.</p>
 
@@ -66,16 +116,16 @@
 				<div class="list-group">
 					<a href="#students"
 					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "students" ? "active" : "")"
-					   data-bs-toggle="tab" onclick="clearMessages()">Manage Students</a>
+					   data-bs-toggle="tab" >Manage Students</a>
 					<a href="#programs"
 					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "programs" ? "active" : "")"
-					   data-bs-toggle="tab" onclick="clearMessages()">Manage Programs</a>
+					   data-bs-toggle="tab" >Manage Programs</a>
 					<a href="#email"
 					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "email" ? "active" : "")"
-					   data-bs-toggle="tab" onclick="clearMessages()">Change Email</a>
+					   data-bs-toggle="tab" >Change Email</a>
 					<a href="#password"
 					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "password" ? "active" : "")"
-					   data-bs-toggle="tab" onclick="clearMessages()">Change Password</a>
+					   data-bs-toggle="tab" >Change Password</a>
 				</div>
 			</div>
 
@@ -111,7 +161,7 @@
 										<td>@student.FirstName</td>
 										<td>@student.LastName</td>
 										<td>@student.Email</td>
-										<td>@student.MatriculationNumber</td>
+										@* <td>@student.MatriculationNumber</td> *@
 										<td>Pending</td>
 										<td>
 											<button class="btn btn-primary btn-sm" onclick="toggleDetails(this)">View More</button>
@@ -121,12 +171,12 @@
 										<td colspan="6">
 											<div class="details-container">
 												<strong>Details:</strong><br />
-												<img src="data:image/png;base64,@Convert.ToBase64String(student.ProfilePicture ?? new byte[0])" alt="Profile Picture" class="img-thumbnail" style="width: 150px; height: 150px;" /><br />
+												@* <img src="data:image/png;base64,@Convert.ToBase64String(student.ProfilePicture ?? new byte[0])" alt="Profile Picture" class="img-thumbnail" style="width: 150px; height: 150px;" /><br />
 												<strong>Birth Date:</strong> @student.BirthDate <br />
 												<strong>Address:</strong> @student.Address, @student.City <br />
 												<strong>Country:</strong> @student.Country <br />
 												<strong>Phone Number:</strong> @student.PhoneNumber <br />
-												<strong>Documents:</strong>
+												<strong>Documents:</strong> *@
 												<ul>
 													@foreach (var doc in student.Documents)
 													{
@@ -152,33 +202,35 @@
 						<h3>Manage Exchange Programs</h3>
 						<p>Create and manage exchange programs below.</p>
 
-						<!-- Display Existing Programs -->
-						<h4>Existing Programs</h4>
-						<table class="table table-bordered">
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Description</th>
-									<th>Deadline</th>
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var program in Model.Programs)
-								{
+						@if(Model.Programs.Count > 0) {
+							<!-- Display Existing Programs -->
+							<h4>Existing Programs</h4>
+							<table class="table table-bordered">
+								<thead>
 									<tr>
-										<td>@program.Name</td>
-										<td>@program.Description</td>
-										<td>@program.Deadline</td>
-										<td>
-											<form method="post" asp-page-handler="DeleteProgram" class="d-inline">
-												<input type="hidden" name="programId" value="@program.Id" />
-												<button type="submit" class="btn btn-danger btn-sm">Delete</button>
-											</form>
-										</td>
+										<th>Name</th>
+										<th>Description</th>
+										<th>Deadline</th>
 									</tr>
-								}
-							</tbody>
-						</table>
+								</thead>
+								<tbody>
+									@foreach (var program in Model.Programs)
+									{
+										<tr>
+											<td>@program.Name</td>
+											<td>@program.Description</td>
+											<td>@(program.Deadline?.ToString("dd.MM.yyyy") ?? "No deadline available")</td>
+											<td>
+												<form method="post" asp-page-handler="DeleteProgram" class="d-inline">
+													<input type="hidden" name="programId" value="@program.Id" />
+													<button type="submit" class="btn btn-danger btn-sm">Delete</button>
+												</form>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						}
 
 						<!-- Create New Program -->
 						<h4>Create New Program</h4>
@@ -245,10 +297,46 @@
 	</div>
 
 	<script>
-		function clearMessages() {
-			const alerts = document.querySelectorAll('.alert');
-			alerts.forEach(alert => alert.remove());
+		// function clearMessages() {
+		// 	const alerts = document.querySelectorAll('.alert');
+		// 	alerts.forEach(alert => alert.remove());
+		// }
+
+		function showNotification(message, type) {
+			const notification = document.getElementById('notification');
+			const messageSpan = document.getElementById('notificationMessage');
+
+			// Entferne vorherige Klassen und füge neue hinzu
+			notification.className = `alert alert-${type}`;
+			messageSpan.textContent = message;
+
+			// Zeige die Benachrichtigung
+			notification.style.display = 'block';
+			setTimeout(() => {
+				notification.classList.add('show');
+			}, 10);
+
+			// Verstecke die Benachrichtigung nach 5 Sekunden
+			setTimeout(() => {
+				notification.classList.remove('show');
+				setTimeout(() => {
+					notification.style.display = 'none';
+				}, 300); // Gleiche Zeit wie die CSS-Transition
+			}, 3000);
 		}
+
+		// Trigger für Erfolg oder Fehler
+		window.onload = function () {
+				const successMessage = '@TempData["SuccessMessage"]';
+				const errorMessage = '@TempData["ErrorMessage"]';
+
+				if (successMessage) {
+					showNotification(successMessage, 'success');
+				}
+				if (errorMessage) {
+					showNotification(errorMessage, 'danger');
+				}
+		};
 
 		function toggleDetails(button) {
 			const detailsRow = button.closest('tr').nextElementSibling;

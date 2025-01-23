@@ -12,35 +12,35 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .faq-section {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            padding: 50px;
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        padding: 50px;
         }
 
         .faq-title {
-            color: rgb(3, 77, 148);
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 20px;
+        color: rgb(3, 77, 148);
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 20px;
         }
 
         .faq-category {
-            font-size: 1.5rem;
-            color: #333;
-            margin-top: 20px;
-            margin-bottom: 10px;
+        font-size: 1.5rem;
+        color: #333;
+        margin-top: 20px;
+        margin-bottom: 10px;
         }
 
         .faq-item {
-            margin-bottom: 15px;
+        margin-bottom: 15px;
         }
 
         .faq-item-question {
-            font-weight: bold;
+        font-weight: bold;
         }
 
         .faq-item-answer {
-            margin-left: 15px;
+        margin-left: 15px;
         }
     </style>
 </head>
@@ -59,17 +59,29 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link text-white" asp-page="/Index">Home</a>
+                        <a asp-page="/Index" asp-route-id="@Request.Query["id"]" class="nav-link text-white">Home</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="#apply-section">Apply</a>
-                    </li>
+                    @if (Model.IsStudent == true || Model.IsStudent == null)
+                    {
+                        <li class="nav-item">
+                            <a asp-page-handler="Apply" asp-route-id="@Request.Query["id"]" class="nav-link text-white">Apply</a>
+                        </li>
+                    }
                     <li class="nav-item">
                         <a class="nav-link text-white" href="https://www.uni-due.de/">About Us</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" asp-page="/LoginRegister">Login</a>
-                    </li>
+                    @if (string.IsNullOrWhiteSpace(Request.Query["id"]))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-page="/LoginRegister">Login</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-page="/Dashboard" asp-route-id="@Request.Query["id"]">My Profile</a>
+                        </li>
+                    }
                 </ul>
             </div>
         </div>

@@ -106,10 +106,13 @@
 			<div class="collapse navbar-collapse" id="navbarNav">
 				<ul class="navbar-nav ms-auto">
 					<li class="nav-item">
-						<a class="nav-link text-white" asp-page="/Index">Home</a>
+						<a asp-page="/Index" asp-route-id="@Request.Query["id"]" class="nav-link text-white">Home</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link text-white" href="#apply-section">Apply</a>
+						<a asp-page-handler="Apply" asp-route-id="@Request.Query["id"]" class="nav-link text-white">Apply</a>
+					</li>
+					<li class="nav-item">
+						<a asp-page="/FAQ" asp-route-id="@Request.Query["id"]" class=" nav-link text-white">FAQ</a>
 					</li>
 					<li class="nav-item">
 						<a class="nav-link text-white" href="https://www.uni-due.de/">About Us</a>

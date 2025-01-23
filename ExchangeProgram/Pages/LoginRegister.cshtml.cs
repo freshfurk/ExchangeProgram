@@ -31,6 +31,19 @@ namespace ExchangeProgram.Pages
         [BindProperty]
         public string ConfirmPassword { get; set; }
 
+        public IActionResult OnGetApply(int? id)
+        {
+            // Prüfen, ob eine ID in der URL vorhanden ist (Prüft auf Login-Status)
+            if (!id.HasValue)
+            {
+                // Benutzer ist nicht eingeloggt, Weiterleitung zur Login-Seite
+                //TempData["ErrorMessage"] = "You must be logged in to apply.";
+                return RedirectToPage("/LoginRegister");
+            }
+
+            return RedirectToPage("/Apply", new { id });
+        }
+
         public IActionResult OnPostRegister()
         {
             //if (!ModelState.IsValid) return Page();

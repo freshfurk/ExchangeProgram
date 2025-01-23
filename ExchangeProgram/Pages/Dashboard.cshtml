@@ -6,7 +6,7 @@
 
 	if (string.IsNullOrEmpty(TempData["ActiveTab"]?.ToString()))
 	{
-		TempData["ActiveTab"] = "profile"; // Standard-Tab
+		TempData["ActiveTab"] = "email"; // Standard-Tab
 	}
 }
 
@@ -16,15 +16,61 @@
 	<title>Dashboard</title>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<style>
+		#notification {
+			position: fixed;
+			top: 20%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			min-width: 300px;
+			max-width: 500px;
+			padding: 15px;
+			/* font-size: 1rem;
+					font-weight: bold; */
+			text-align: center;
+			z-index: 1050;
+			border-radius: 8px;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			opacity: 0;
+			transition: opacity 0.3s ease, transform 0.3s ease;
+		}
+
+			#notification.show {
+				opacity: 1;
+				transform: translate(-50%, -20%);
+			}
+	</style>
 </head>
 <body>
-	<!-- Navbar -->
-	<nav class="navbar navbar-light bg-light">
+	<!-- Navigation -->
+	<nav class="navbar navbar-expand-lg" style="background-color: rgb(3, 77, 148);">
 		<div class="container-fluid">
-			<a class="navbar-brand" href="#">ExchangeProgram</a>
-			<div>
-				<span class="navbar-text me-3">Hello @Model.Student.FirstName!</span>
-				<a class="btn btn-outline-danger btn-sm" href="/Logout">Logout</a>
+			<a class="navbar-brand text-white" href="#">
+				@* Uni Logo *@
+				@* <img src="/pictures/Uni-duisburg-essen-logo.jpg" alt="GESCO Logo" height="30" class="d-inline-block align-text-top"> *@
+				GESCO
+			</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon" style="filter: invert(1);"></span> <!-- Toggler-Icon invertieren, damit es sichtbar bleibt -->
+			</button>
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="navbar-nav ms-auto">
+					<li class="nav-item">
+						<a asp-page="/Index" asp-route-id="@Request.Query["id"]" class="nav-link text-white">Home</a>
+					</li>
+					<li class="nav-item">
+						<a asp-page-handler="Apply" asp-route-id="@Request.Query["id"]" class="nav-link text-white">Apply</a>
+					</li>
+					<li class="nav-item">
+						<a asp-page="/FAQ" asp-route-id="@Request.Query["id"]" class="nav-link text-white">FAQ</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link text-white" href="https://www.uni-due.de/">About Us</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link text-white btn btn-outline-danger btn-sm" href="/Logout">Logout</a>
+					</li>
+				</ul>
 			</div>
 		</div>
 	</nav>
@@ -33,17 +79,25 @@
 	<div class="container mt-4">
 		@if (TempData["SuccessMessage"] != null)
 		{
-			<div class="alert alert-success">
-				@TempData["SuccessMessage"]
-			</div>
+			<script>
+				window.onload = function () {
+					showNotification('@TempData["SuccessMessage"]', 'success');
+				};
+			</script>
 		}
 
 		@if (TempData["ErrorMessage"] != null)
 		{
-			<div class="alert alert-danger">
-				@TempData["ErrorMessage"]
-			</div>
+			<script>
+				window.onload = function () {
+					showNotification('@TempData["ErrorMessage"]', 'danger');
+				};
+			</script>
 		}
+
+		<div id="notification" class="alert alert-success" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 1050;">
+			<span id="notificationMessage"></span>
+		</div>
 
 		<h2>Manage your account</h2>
 		<p>Change your account settings</p>
@@ -52,16 +106,17 @@
 			<!-- Left Sidebar -->
 			<div class="col-md-3">
 				<div class="list-group">
-					<a href="#profile"
+					@* <a href="#profile"
 					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "profile" ? "active" : "")"
 					   data-bs-toggle="tab" onclick="clearMessages()">Profile</a>
-					<a href="#email" class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "email" ? "active" : "")"
-					   data-bs-toggle="tab" onclick="clearMessages()">Email</a>
-					<a href="#password" class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "password" ? "active" : "")"
-					   data-bs-toggle="tab" onclick="clearMessages()">Password</a>
 					<a href="#documents"
 					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "documents" ? "active" : "")"
-					   data-bs-toggle="tab" onclick="clearMessages()">Documents</a>
+					   data-bs-toggle="tab" onclick="clearMessages()">Documents</a> *@
+					<a href="#email" class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "email" ? "active" : "")"
+					   data-bs-toggle="tab" >Email</a>
+					<a href="#password" class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "password" ? "active" : "")"
+					   data-bs-toggle="tab" >Password</a>
+					
 				</div>
 
 			</div>
@@ -69,7 +124,7 @@
 			<!-- Right Content -->
 			<div class="col-md-9">
 				<div class="tab-content">
-					<div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "profile" ? "show active" : "")" id="profile">
+					@* <div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "profile" ? "show active" : "")" id="profile">
 						<h3>Profile</h3>
 
 						<form method="post" enctype="multipart/form-data" asp-page-handler="SaveProfile">
@@ -174,7 +229,7 @@
 								</div>
 							</div>
 						</form>
-					</div>
+					</div> *@
 
 					<!-- Email umändern -->
 					<div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "email" ? "show active" : "")" id="email">
@@ -218,7 +273,7 @@
 					</div>
 
 
-					<div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "documents" ? "show active" : "")" id="documents">
+					@* <div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "documents" ? "show active" : "")" id="documents">
 						<h3>Documents</h3>
 						<p>Upload and manage your documents.</p>
 
@@ -279,16 +334,52 @@
 							}
 						</div>
 					</div>
-				</div>
+				</div> *@
 			</div>
 		</div>
 	</div>
 
 	<script>
-		function clearMessages() {
-			const alerts = document.querySelectorAll('.alert');
-			alerts.forEach(alert => alert.remove());
+		// function clearMessages() {
+		// 	const alerts = document.querySelectorAll('.alert');
+		// 	alerts.forEach(alert => alert.remove());
+		// }
+
+		function showNotification(message, type) {
+			const notification = document.getElementById('notification');
+			const messageSpan = document.getElementById('notificationMessage');
+
+			// Entferne vorherige Klassen und füge neue hinzu
+			notification.className = `alert alert-${type}`;
+			messageSpan.textContent = message;
+
+			// Zeige die Benachrichtigung
+			notification.style.display = 'block';
+			setTimeout(() => {
+				notification.classList.add('show');
+			}, 10);
+
+			// Verstecke die Benachrichtigung nach 5 Sekunden
+			setTimeout(() => {
+				notification.classList.remove('show');
+				setTimeout(() => {
+					notification.style.display = 'none';
+				}, 300); // Gleiche Zeit wie die CSS-Transition
+			}, 3000);
 		}
+
+		// Trigger für Erfolg oder Fehler
+		window.onload = function () {
+				const successMessage = '@TempData["SuccessMessage"]';
+				const errorMessage = '@TempData["ErrorMessage"]';
+
+				if (successMessage) {
+					showNotification(successMessage, 'success');
+				}
+				if (errorMessage) {
+					showNotification(errorMessage, 'danger');
+				}
+		};
 	</script>
 </body>
 </html>

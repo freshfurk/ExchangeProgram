@@ -1,0 +1,487 @@
+﻿@page
+@model ExchangeProgram.Pages.ApplyModel
+@using Microsoft.AspNetCore.Mvc.RazorPages
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Apply for Exchange Program</title>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<style>
+		body {
+			background-color: #f8f9fa;
+		}
+
+		.progress-bar-container {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin: 30px auto 40px;
+			max-width: 600px;
+		}
+
+		.step {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			flex: 1;
+			position: relative;
+		}
+
+		.circle {
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			background-color: #e0e0e0;
+			color: #fff;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			font-size: 18px;
+			font-weight: bold;
+			transition: background-color 0.3s, color 0.3s;
+		}
+
+			.circle.active {
+				background-color: #0d6efd; /* Blue color */
+				color: #fff;
+			}
+
+		/* .line {
+							height: 2px;
+							width: 100%;
+							background-color: #e0e0e0;
+							position: absolute;
+							top: 20px;
+							left: 50%;
+							transform: translateX(-50%);
+							z-index: -1;
+						} */
+
+		.step:first-child .line {
+			display: none;
+		}
+
+		.form-container {
+			max-width: 600px;
+			margin: auto;
+			background: #ffffff;
+			padding: 30px;
+			border-radius: 10px;
+			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+		}
+
+			.form-container h2 {
+				font-weight: bold;
+				margin-bottom: 20px;
+				color: #333;
+				text-align: center;
+			}
+
+			.form-container .btn-primary {
+				width: 100px;
+				border-radius: 20px;
+			}
+
+			.form-container .btn-secondary {
+				width: 100px;
+				border-radius: 20px;
+			}
+
+		.list-group-item {
+			/* border: 1px solid #ddd;
+			border-radius: 8px; */
+			margin-bottom: 15px;
+			padding: 15px;
+			display: flex;
+			align-items: flex-start;
+			border: unset !important;
+		}
+
+			.list-group-item h5 {
+				margin-bottom: 5px;
+				font-weight: bold;
+				color: #333;
+			}
+
+			.list-group-item p {
+				margin-bottom: 5px;
+				color: #555;
+			}
+
+			.list-group-item small {
+				color: #999;
+			}
+
+			.list-group-item .form-check-input {
+				margin-top: 8px;
+				flex-shrink: 0;
+			}
+
+			.list-group-item:hover {
+				background-color: #f9f9f9;
+				border-color: #bbb;
+			}
+	</style>
+</head>
+<body>
+	<!-- Navigation -->
+	<nav class="navbar navbar-expand-lg" style="background-color: rgb(3, 77, 148);">
+		<div class="container-fluid">
+			<a class="navbar-brand text-white" href="#">
+				@* Uni Logo *@
+				@* <img src="/pictures/Uni-duisburg-essen-logo.jpg" alt="GESCO Logo" height="30" class="d-inline-block align-text-top"> *@
+				GESCO
+			</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon" style="filter: invert(1);"></span> <!-- Toggler-Icon invertieren, damit es sichtbar bleibt -->
+			</button>
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="navbar-nav ms-auto">
+					<li class="nav-item">
+						<a asp-page="/Index" asp-route-id="@Request.Query["id"]" class="nav-link text-white">Home</a>
+					</li>
+					<li class="nav-item">
+						<a asp-page="/FAQ" asp-route-id="@Request.Query["id"]" class="nav-link text-white">FAQ</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link text-white" href="https://www.uni-due.de/">About Us</a>
+					</li>
+					<li class="nav-item">
+						<a asp-page="/Dashboard" asp-route-id="@Request.Query["id"]" class="nav-link text-white">My Profile</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<div class="container">
+		<!-- Progress Bar -->
+		<div class="progress-bar-container">
+			<div class="step" id="step-1">
+				<div class="circle active">1</div>
+				<div class="label">Personal</div>
+				<div class="line"></div>
+			</div>
+			<div class="step" id="step-2">
+				<div class="circle">2</div>
+				<div class="label">Contact</div>
+				<div class="line"></div>
+			</div>
+			<div class="step" id="step-3">
+				<div class="circle">3</div>
+				<div class="label">Academic</div>
+			</div>
+			<div class="step" id="step-4">
+				<div class="circle">4</div>
+				<div class="label">Documents</div>
+			</div>
+			<div class="step" id="step-5">
+				<div class="circle">5</div>
+				<div class="label">Programs</div>
+			</div>
+		</div>
+
+		<div class="form-container">
+			<h2>Apply for Exchange Program</h2>
+
+			<!-- Step 1: Personal Information -->
+			<form method="post" enctype="multipart/form-data" asp-page-handler="Submit">
+
+				<div id="step-1-content" class="step-content">
+					<p class="text-center">Fill in your Personal Information</p>
+					<div class="mb-3">
+						<label for="FirstName" class="form-label">First Name</label>
+						<input type="text" class="form-control" id="FirstName" name="FirstName" value="@Model.FirstName" required>
+						<small class="text-danger" id="FirstNameError" style="display: none;">First name is required.</small>
+					</div>
+					<div class="mb-3">
+						<label for="LastName" class="form-label">Last Name</label>
+						<input type="text" class="form-control" id="LastName" name="LastName" value="@Model.LastName" required>
+						<small class="text-danger" id="LastNameError" style="display: none;">Last name is required.</small>
+					</div>
+					<div class="mb-3">
+						<label for="BirthDate" class="form-label">Birth Date</label>
+						<input type="date" class="form-control" id="BirthDate" name="BirthDate" required>
+						<small class="text-danger" id="BirthDateError" style="display: none;">Birth date is required.</small>
+					</div>
+					<div class="mb-3">
+						<label for="Gender" class="form-label">Gender</label>
+						<select class="form-control" id="Gender" name="Gender" required>
+							<option value="" disabled selected>Select Gender</option>
+							<option value="Male">Male</option>
+							<option value="Female">Female</option>
+							<option value="Non-Binary">Non-Binary</option>
+							<option value="Other">Other</option>
+							<option value="Prefer Not to Say">Prefer Not to Say</option>
+						</select>
+						<small class="text-danger" id="GenderError" style="display: none;">Gender is required.</small>
+					</div>
+					<div class="mb-3">
+						<label for="Nationality" class="form-label">Nationality</label>
+						<input type="text" class="form-control" id="Nationality" name="Nationality" required>
+						<small class="text-danger" id="NationalityError" style="display: none;">Nationality is required.</small>
+					</div>
+					<div class="d-flex justify-content-end">
+						<button type="button" class="btn btn-primary" onclick="validateStep1()">Next</button>
+					</div>
+				</div>
+
+				<!-- Step 2: Contact Information -->
+				<div id="step-2-content" class="step-content" style="display: none;">
+					<p class="text-center">Fill in your Contact Information</p>
+					<div class="mb-3">
+						<label for="Address" class="form-label">Address</label>
+						<input type="text" class="form-control" id="Address" name="Address" required>
+						<small class="text-danger" id="AddressError" style="display: none;">Address is required.</small>
+					</div>
+					<div class="mb-3">
+						<label for="HouseNumber" class="form-label">House Number</label>
+						<input type="number" class="form-control" id="HouseNumber" name="HouseNumber" required>
+						<small class="text-danger" id="HouseNumberError" style="display: none;">House number is required.</small>
+					</div>
+					<div class="mb-3">
+						<label for="City" class="form-label">City</label>
+						<input type="text" class="form-control" id="City" name="City" required>
+						<small class="text-danger" id="CityError" style="display: none;">City is required.</small>
+					</div>
+					<div class="mb-3">
+						<label for="Country" class="form-label">Country</label>
+						<input type="text" class="form-control" id="Country" name="Country" required>
+						<small class="text-danger" id="CountryError" style="display: none;">Country is required.</small>
+					</div>
+					<div class="mb-3">
+						<label for="PhoneNumber" class="form-label">Phone Number</label>
+						<input type="text" class="form-control" id="PhoneNumber" name="PhoneNumber" required>
+						<small class="text-danger" id="PhoneNumberError" style="display: none;">Phone number is required.</small>
+					</div>
+					<div class="mb-3">
+						<label for="ContactEmail" class="form-label">Email Address</label>
+						<input type="email" class="form-control" id="ContactEmail" name="ContactEmail" value="@Model.ContactEmail" required>
+						<small class="text-danger" id="ContactEmailError" style="display: none;">Valid email is required.</small>
+					</div>
+					<div class="d-flex justify-content-between">
+						<button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+						<button type="button" class="btn btn-primary" onclick="validateStep2()">Next</button>
+					</div>
+				</div>
+
+				<!-- Step 3: Academic Information -->
+				<div id="step-3-content" class="step-content" style="display: none;">
+					<p class="text-center">Fill in your Academic Information</p>
+					<div class="mb-3">
+						<label for="UniversityName" class="form-label">University Name</label>
+						<input type="text" class="form-control" id="UniversityName" name="UniversityName" required>
+						<small class="text-danger" id="UniversityNameError" style="display: none;">University name is required.</small>
+					</div>
+					<div class="mb-3">
+						<label for="Degree" class="form-label">Degree (Pursued)</label>
+						<select class="form-select" id="Degree" name="Degree" required>
+							<option value="" disabled selected>Select your degree</option>
+							<option value="Bachelor">Bachelor</option>
+							<option value="Master">Master</option>
+							<option value="PhD">PhD</option>
+						</select>
+						<small class="text-danger" id="DegreeError" style="display: none;">Degree is required.</small>
+					</div>
+					<div class="mb-3">
+						<label for="StudyField" class="form-label">Study Field</label>
+						<input type="text" class="form-control" id="StudyField" name="StudyField" required>
+						<small class="text-danger" id="StudyFieldError" style="display: none;">Study field is required.</small>
+					</div>
+					<div class="mb-3">
+						<label for="MatriculationNumber" class="form-label">Matriculation Number</label>
+						<input type="number" class="form-control" id="MatriculationNumber" name="MatriculationNumber" required>
+						<small class="text-danger" id="MatriculationNumberError" style="display: none;">Matriculation number is required.</small>
+					</div>
+					<div class="d-flex justify-content-between">
+						<button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+						<button type="button" class="btn btn-primary" onclick="validateStep3()">Next</button>
+					</div>
+				</div>
+
+				<!-- Step 4: Documents -->
+				<div id="step-4-content" class="step-content" style="display: none;">
+					<p class="text-center">Upload the required documents for your application</p>
+					<div class="mb-3">
+						<label for="CV" class="form-label">Upload Your CV</label>
+						<input type="file" class="form-control" id="CV" name="CV" required>
+						<small class="text-danger" id="CVError" style="display: none;">CV is required.</small>
+					</div>
+					<div class="mb-3">
+						<label for="Transcript" class="form-label">Upload Transcript of Records</label>
+						<input type="file" class="form-control" id="Transcript" name="Transcript" required>
+						<small class="text-danger" id="TranscriptError" style="display: none;">Transcript is required.</small>
+					</div>
+					<div class="mb-3">
+						<label for="MotivationLetter" class="form-label">Upload Motivation Letter</label>
+						<input type="file" class="form-control" id="MotivationLetter" name="MotivationLetter" required>
+						<small class="text-danger" id="MotivationLetterError" style="display: none;">Motivation Letter is required.</small>
+					</div>
+					<div class="mb-3">
+						<label for="LanguageCertificate" class="form-label">Upload Language Proficiency Certificate</label>
+						<input type="file" class="form-control" id="LanguageCertificate" name="LanguageCertificate" required>
+						<small class="text-danger" id="LanguageCertificateError" style="display: none;">Language Certificate is required.</small>
+					</div>
+					<!-- Upload Supporting Documents -->
+					<div class="mb-3">
+						<label for="SupportingDocuments" class="form-label">Upload Supporting Documents</label>
+						<input type="file" class="form-control" id="SupportingDocuments" name="SupportingDocuments" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" multiple>
+						<small class="form-text text-muted">You can upload multiple files</small>
+					</div>
+					<div class="d-flex justify-content-between">
+						<button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+						<button type="button" class="btn btn-primary" onclick="validateStep4()">Next</button>
+					</div>
+				</div>
+
+				<!-- Step 5: Programs -->
+				<div id="step-5-content" class="step-content" style="display: none;">
+					<!-- IMPORTANT -->
+					<input type="hidden" id="StudentId" name="StudentId" value="@Request.Query["id"]" />
+
+					<p class="text-center">Select an Exchange Program</p>
+					<ul class="list-group">
+						@if (Model.Programs.Count > 0)
+						{
+							foreach (var program in Model.Programs)
+							{
+								<li class="list-group-item d-flex align-items-center">
+									<input type="radio" class="form-check-input me-3" id="Program-@program.Id" name="SelectedProgram" value="@program.Id" required>
+									<div class="flex-grow-1">
+										<h5 class="mb-1">@program.Name</h5>
+										<p class="mb-1">@program.Description</p>
+										<small>Deadline: @(program.Deadline?.ToString("dd.MM.yyyy") ?? "No deadline available")</small>
+									</div>
+								</li>
+							}
+						}
+						else
+						{
+							<div class="text-center">No exchange programs have been registered yet. Please check back later!</div>
+						}
+					</ul>
+					<small class="text-danger" id="ProgramError" style="display: none; margin-bottom: 10px;">Please select a program.</small>
+					<div class="d-flex justify-content-between">
+						<button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+						<button type="submit" class="btn btn-success" onclick="validateAndSubmit()">Submit</button>
+					</div>
+				</div>
+			</form>
+		</div>
+
+		<script>
+			let currentStep = 1;
+
+						function validateStep1() {
+				let isValid = true;
+
+				const firstName = document.getElementById('FirstName').value.trim();
+				const lastName = document.getElementById('LastName').value.trim();
+				const birthDate = document.getElementById('BirthDate').value;
+				const gender = document.getElementById('Gender').value;
+				const nationality = document.getElementById('Nationality').value.trim();
+
+				document.getElementById('FirstNameError').style.display = firstName ? 'none' : 'block';
+				document.getElementById('LastNameError').style.display = lastName ? 'none' : 'block';
+				document.getElementById('BirthDateError').style.display = birthDate ? 'none' : 'block';
+				document.getElementById('GenderError').style.display = gender ? 'none' : 'block';
+				document.getElementById('NationalityError').style.display = nationality ? 'none' : 'block';
+
+				isValid = firstName && lastName && birthDate && gender && nationality;
+
+				if (isValid) nextStep();
+			}
+
+			function validateStep2() {
+				let isValid = true;
+
+				const address = document.getElementById('Address').value.trim();
+				const houseNumber = document.getElementById('HouseNumber').value.trim();
+				const city = document.getElementById('City').value.trim();
+				const country = document.getElementById('Country').value.trim();
+				const phoneNumber = document.getElementById('PhoneNumber').value.trim();
+				const contactEmail = document.getElementById('ContactEmail').value.trim();
+
+				document.getElementById('AddressError').style.display = address ? 'none' : 'block';
+				document.getElementById('HouseNumberError').style.display = houseNumber ? 'none' : 'block';
+				document.getElementById('CityError').style.display = city ? 'none' : 'block';
+				document.getElementById('CountryError').style.display = country ? 'none' : 'block';
+				document.getElementById('PhoneNumberError').style.display = phoneNumber ? 'none' : 'block';
+				document.getElementById('ContactEmailError').style.display = contactEmail ? 'none' : 'block';
+
+				isValid = address && houseNumber && city && country && phoneNumber && contactEmail;
+
+				if (isValid) nextStep();
+			}
+
+			function validateStep3() {
+				let isValid = true;
+
+				const universityName = document.getElementById('UniversityName').value.trim();
+				const degree = document.getElementById('Degree').value;
+				const studyField = document.getElementById('StudyField').value.trim();
+				const matriculationNumber = document.getElementById('MatriculationNumber').value.trim();
+
+				document.getElementById('UniversityNameError').style.display = universityName ? 'none' : 'block';
+				document.getElementById('DegreeError').style.display = degree ? 'none' : 'block';
+				document.getElementById('StudyFieldError').style.display = studyField ? 'none' : 'block';
+				document.getElementById('MatriculationNumberError').style.display = matriculationNumber ? 'none' : 'block';
+
+				isValid = universityName && degree && studyField && matriculationNumber;
+
+				if (isValid) nextStep();
+			}
+
+			function validateStep4() {
+				let isValid = true;
+
+				const cv = document.getElementById('CV').value.trim();
+				const transcript = document.getElementById('Transcript').value.trim();
+				const motivationLetter = document.getElementById('MotivationLetter').value.trim();
+				const languageCertificate = document.getElementById('LanguageCertificate').value.trim();
+
+				document.getElementById('CVError').style.display = cv ? 'none' : 'block';
+				document.getElementById('TranscriptError').style.display = transcript ? 'none' : 'block';
+				document.getElementById('MotivationLetterError').style.display = motivationLetter ? 'none' : 'block';
+				document.getElementById('LanguageCertificateError').style.display = languageCertificate ? 'none' : 'block';
+
+				isValid = cv && transcript && motivationLetter && languageCertificate;
+
+				if (isValid) nextStep();
+			}
+
+			function validateAndSubmit() {
+				const selectedProgram = document.querySelector('input[name="SelectedProgram"]:checked');
+				const errorElement = document.getElementById('ProgramError');
+
+				if (!selectedProgram) {
+					errorElement.style.display = 'block'; // Fehlermeldung anzeigen
+				} else {
+					errorElement.style.display = 'none'; // Fehlermeldung ausblenden
+
+					// Formular abschicken
+					document.querySelector('#step-5-content form').submit();
+				}
+			}
+
+			function nextStep() {
+				document.getElementById(`step-${currentStep}-content`).style.display = 'none';
+				document.getElementById(`step-${currentStep}`).querySelector('.circle').classList.remove('active');
+				currentStep++;
+				document.getElementById(`step-${currentStep}-content`).style.display = 'block';
+				document.getElementById(`step-${currentStep}`).querySelector('.circle').classList.add('active');
+			}
+
+			function prevStep() {
+				document.getElementById(`step-${currentStep}-content`).style.display = 'none';
+				document.getElementById(`step-${currentStep}`).querySelector('.circle').classList.remove('active');
+				currentStep--;
+				document.getElementById(`step-${currentStep}-content`).style.display = 'block';
+				document.getElementById(`step-${currentStep}`).querySelector('.circle').classList.add('active');
+			}
+		</script>
+
+</body>
+</html>
