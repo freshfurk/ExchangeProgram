@@ -37,7 +37,7 @@
 			max-width: 500px;
 			padding: 15px;
 			/* font-size: 1rem;
-							font-weight: bold; */
+									font-weight: bold; */
 			text-align: center;
 			z-index: 1050;
 			border-radius: 8px;
@@ -116,93 +116,92 @@
 				<div class="list-group">
 					<a href="#students"
 					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "students" ? "active" : "")"
-					   data-bs-toggle="tab" >Manage Students</a>
+					   data-bs-toggle="tab">Manage Students</a>
 					<a href="#programs"
 					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "programs" ? "active" : "")"
-					   data-bs-toggle="tab" >Manage Programs</a>
+					   data-bs-toggle="tab">Manage Programs</a>
 					<a href="#email"
 					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "email" ? "active" : "")"
-					   data-bs-toggle="tab" >Change Email</a>
+					   data-bs-toggle="tab">Change Email</a>
 					<a href="#password"
 					   class="list-group-item list-group-item-action @(TempData["ActiveTab"]?.ToString() == "password" ? "active" : "")"
-					   data-bs-toggle="tab" >Change Password</a>
+					   data-bs-toggle="tab">Change Password</a>
 				</div>
 			</div>
 
 			<!-- Right Content -->
 			<div class="col-md-9">
 				<div class="tab-content">
-					<!-- Manage Students Tab -->
+					<!-- Email Tab -->
 					<div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "students" ? "show active" : "")" id="students">
-						<h3>Manage Applications</h3>
-						<p>Click on a student to view detailed information and manage their application.</p>
+						<h2>Manage Applications</h2>
+						<p>View, sort, and manage student applications.</p>
 
-						<!-- Filter and Sort Options -->
+						<!-- Action Buttons -->
 						<div class="mb-3">
 							<button class="btn btn-primary btn-sm" onclick="generateApplicantsReport()">Generate Applicants Report</button>
 							<button class="btn btn-secondary btn-sm" onclick="generateApplicationsReport()">Generate Applications Report</button>
+							<button class="btn btn-success btn-sm" id="approveSelected">Approve Selected</button>
+							<button class="btn btn-danger btn-sm" id="rejectSelected">Reject Selected</button>
 						</div>
 
-						<!-- Students Table -->
-						<table class="table table-bordered">
-							<thead>
-								<tr>
-									<th>First Name</th>
-									<th>Last Name</th>
-									<th>Email</th>
-									<th>Matriculation Number</th>
-									<th>Status</th>
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var student in Model.Students)
-								{
+						<!-- Applications Table -->
+						<div class="table-container">
+							<table class="table table-bordered table-striped">
+								<thead>
 									<tr>
-										<td>@student.FirstName</td>
-										<td>@student.LastName</td>
-										<td>@student.Email</td>
-										@* <td>@student.MatriculationNumber</td> *@
-										<td>Pending</td>
-										<td>
-											<button class="btn btn-primary btn-sm" onclick="toggleDetails(this)">View More</button>
-										</td>
+										<th><input type="checkbox" id="selectAll"></th>
+										<th onclick="sortTable('Name')">Name</th>
+										<th onclick="sortTable('Program')">Program</th>
+										<th onclick="sortTable('Status')">Status</th>
+										<th onclick="sortTable('Date')">Application Date</th>
+										<th>Actions</th>
 									</tr>
-									<tr class="details-row d-none">
-										<td colspan="6">
-											<div class="details-container">
-												<strong>Details:</strong><br />
-												@* <img src="data:image/png;base64,@Convert.ToBase64String(student.ProfilePicture ?? new byte[0])" alt="Profile Picture" class="img-thumbnail" style="width: 150px; height: 150px;" /><br />
-												<strong>Birth Date:</strong> @student.BirthDate <br />
-												<strong>Address:</strong> @student.Address, @student.City <br />
-												<strong>Country:</strong> @student.Country <br />
-												<strong>Phone Number:</strong> @student.PhoneNumber <br />
-												<strong>Documents:</strong> *@
-												<ul>
-													@foreach (var doc in student.Documents)
-													{
-														<li>
-															@doc.FileName
-															<a href="@Url.Page("/DownloadDocument", new { documentId = doc.Id })" class="btn btn-sm btn-link">Download</a>
-														</li>
-													}
-												</ul>
-												<button class="btn btn-success btn-sm" onclick="approveStudent(@student.Id)">Approve</button>
-												<button class="btn btn-danger btn-sm" onclick="rejectStudent(@student.Id)">Reject</button>
-												<textarea id="rejectReason-@student.Id" class="form-control mt-2" placeholder="Enter rejection reason"></textarea>
-											</div>
-										</td>
-									</tr>
-								}
-							</tbody>
-						</table>
+								</thead>
+								<tbody>
+									@foreach (var application in Model.Applications)
+									{
+										<tr>
+											<td><input type="checkbox" class="select-app" data-id="@application.Id"></td>
+											<td>@application.FirstName @application.LastName</td>
+											<td>@application.Program.Name</td>
+											<td>@application.Status</td>
+											<td>@application.ApplicationDate</td>
+											<td>
+												<button class="btn btn-info btn-sm" onclick="showApplicationDetails(@application.Id)">View Details</button>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
 
+						<!-- Modal for Application Details -->
+						<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+							<div class="modal-dialog modal-lg">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title" id="detailsModalLabel">Application Details</h5>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<div class="modal-body">
+										<div id="detailsContent">Loading...</div>
+									</div>
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 
+					<!-- Program Tab -->
 					<div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "programs" ? "show active" : "")" id="programs">
 						<h3>Manage Exchange Programs</h3>
 						<p>Create and manage exchange programs below.</p>
 
-						@if(Model.Programs.Count > 0) {
+						@if (Model.Programs.Count > 0)
+						{
 							<!-- Display Existing Programs -->
 							<h4>Existing Programs</h4>
 							<table class="table table-bordered">
@@ -251,7 +250,6 @@
 						</form>
 					</div>
 
-
 					<!-- Email Tab -->
 					<div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "email" ? "show active" : "")" id="email">
 						<h3>Change Email</h3>
@@ -297,81 +295,102 @@
 	</div>
 
 	<script>
-		// function clearMessages() {
-		// 	const alerts = document.querySelectorAll('.alert');
-		// 	alerts.forEach(alert => alert.remove());
-		// }
-
-		function showNotification(message, type) {
-			const notification = document.getElementById('notification');
-			const messageSpan = document.getElementById('notificationMessage');
-
-			// Entferne vorherige Klassen und füge neue hinzu
-			notification.className = `alert alert-${type}`;
-			messageSpan.textContent = message;
-
-			// Zeige die Benachrichtigung
-			notification.style.display = 'block';
-			setTimeout(() => {
-				notification.classList.add('show');
-			}, 10);
-
-			// Verstecke die Benachrichtigung nach 5 Sekunden
-			setTimeout(() => {
-				notification.classList.remove('show');
-				setTimeout(() => {
-					notification.style.display = 'none';
-				}, 300); // Gleiche Zeit wie die CSS-Transition
-			}, 3000);
-		}
-
-		// Trigger für Erfolg oder Fehler
-		window.onload = function () {
-				const successMessage = '@TempData["SuccessMessage"]';
-				const errorMessage = '@TempData["ErrorMessage"]';
-
-				if (successMessage) {
-					showNotification(successMessage, 'success');
-				}
-				if (errorMessage) {
-					showNotification(errorMessage, 'danger');
-				}
-		};
-
-		function toggleDetails(button) {
-			const detailsRow = button.closest('tr').nextElementSibling;
-			if (detailsRow.classList.contains('d-none')) {
-				detailsRow.classList.remove('d-none');
-				button.textContent = 'View Less';
-			} else {
-				detailsRow.classList.add('d-none');
-				button.textContent = 'View More';
-			}
-		}
-
-		// Placeholder for Approve Student
-		function approveStudent(studentId) {
-			alert(`Student ${studentId} approved.`);
-		}
-
-		// Placeholder for Reject Student
-		function rejectStudent(studentId) {
-			const reason = document.getElementById(`rejectReason-${studentId}`).value;
-			if (!reason.trim()) {
-				alert("Please provide a rejection reason.");
-				return;
-			}
-			alert(`Student ${studentId} rejected with reason: ${reason}`);
-		}
-
-		// Placeholder for Generating Reports
+		// Generate reports
 		function generateApplicantsReport() {
-			alert("Generating applicants report...");
+			alert('Generating applicants report...');
 		}
 
 		function generateApplicationsReport() {
-			alert("Generating applications report...");
+			alert('Generating applications report...');
 		}
+
+		function showApplicationDetails(applicationId) {
+			fetch(`/OrganizerDashboard?handler=ApplicationDetails&applicationId=${applicationId}`)
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						const application = data.data;
+
+						// Formatierung der Daten
+						const applicationDate = new Date(application.applicationDate).toLocaleString('de-DE', {
+							day: '2-digit',
+							month: '2-digit',
+							year: 'numeric',
+							hour: '2-digit',
+							minute: '2-digit',
+						});
+						const birthDate = new Date(application.birthDate).toLocaleDateString('de-DE', {
+							day: '2-digit',
+							month: '2-digit',
+							year: 'numeric',
+						});
+
+						const content = `
+							<div class="card mb-3">
+								<div class="card-header bg-primary text-white">
+									<h5 class="mb-0">Personal Information</h5>
+								</div>
+								<div class="card-body">
+									<p><strong>First Name:</strong> ${application.firstName}</p>
+									<p><strong>Last Name:</strong> ${application.lastName}</p>
+									<p><strong>Birth Date:</strong> ${birthDate}</p>
+									<p><strong>Gender:</strong> ${application.gender}</p>
+									<p><strong>Nationality:</strong> ${application.nationality}</p>
+								</div>
+							</div>
+
+							<div class="card mb-3">
+								<div class="card-header bg-success text-white">
+									<h5 class="mb-0">Contact Information</h5>
+								</div>
+								<div class="card-body">
+									<p><strong>Email:</strong> ${application.contactEmail}</p>
+									<p><strong>Phone Number:</strong> ${application.phoneNumber}</p>
+									<p><strong>Address:</strong> ${application.address}
+										${application.houseNumber},
+										${application.city},
+										${application.country}</p>
+								</div>
+							</div>
+
+							<div class="card mb-3">
+								<div class="card-header bg-info text-white">
+									<h5 class="mb-0">Academic Information</h5>
+								</div>
+								<div class="card-body">
+									<p><strong>University Name:</strong> ${application.universityName}</p>
+									<p><strong>Degree:</strong> ${application.degree}</p>
+									<p><strong>Field of Study:</strong> ${application.studyField}</p>
+									<p><strong>Matriculation Number:</strong> ${application.matriculationNumber}</p>
+								</div>
+							</div>
+
+							<div class="card">
+								<div class="card-header bg-secondary text-white">
+									<h5 class="mb-0">Application Information</h5>
+								</div>
+								<div class="card-body">
+									<p><strong>Program:</strong> ${application.name}</p>
+									<p><strong>Status:</strong> ${application.status}</p>
+									<p><strong>Application Date:</strong> ${applicationDate}</p>
+								</div>
+							</div>
+						`;
+
+						document.getElementById('detailsContent').innerHTML = content;
+
+						const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+						modal.show();
+					} else {
+						alert(data.message);
+					}
+				})
+				.catch(error => {
+					console.error('Error fetching application details:', error);
+				});
+		}
+
+
 	</script>
 </body>
 </html>

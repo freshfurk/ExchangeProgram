@@ -21,8 +21,6 @@ namespace ExchangeProgram.Pages
 
         public List<Student> Students { get; set; } = new List<Student>();
 
-        public List<Programs> Programs { get; set; } = new List<Programs>();
-
         [BindProperty]
         public string CurrentEmail { get; set; }
 
@@ -50,18 +48,168 @@ namespace ExchangeProgram.Pages
         [BindProperty]
         public DateTime ProgramDeadline { get; set; }
 
+        // Properties
+        public List<Application> Applications { get; set; } = new();
+        public List<Programs> Programs { get; set; } = new();
+
+        [BindProperty]
+        public int[] SelectedApplicationIds { get; set; }
+
+        [BindProperty]
+        public string ReportType { get; set; }
+
+        [BindProperty]
+        public string StatusUpdate { get; set; }
+
         public IActionResult OnGet()
         {
-            // Studenten mit ihren Dokumenten laden
-            Students = _context.Students
-                .Where(s => s.isStudent)
-                .Include(s => s.Documents) // Dokumente laden
+            // Load all applications with related data
+            Applications = _context.Applications
+                .Include(a => a.Student)
+                .Include(a => a.Program)
+                .Include(a => a.Documents)
                 .ToList();
 
+            // Load all programs
             Programs = _context.Programs.ToList();
 
             return Page();
         }
+
+        public JsonResult OnGetApplicationDetails(int applicationId)
+        {
+            var application = _context.Applications
+                .Include(a => a.Student)
+                .Include(a => a.Program)
+                .Include(a => a.Documents)
+                .FirstOrDefault(a => a.Id == applicationId);
+
+            if (application == null)
+            {
+                return new JsonResult(new { success = false, message = "Application not found." });
+            }
+
+            var result = new
+            {
+                success = true,
+                data = new
+                {
+                    application.FirstName,
+                    application.LastName,
+                    application.ContactEmail,
+                    application.PhoneNumber,
+                    application.Address,
+                    application.ApplicationDate,
+                    application.BirthDate,
+                    application.City,
+                    application.Status,
+                    application.Country,
+                    application.HouseNumber,
+                    application.MatriculationNumber,
+                    application.Nationality,
+                    application.Program.Name,
+                    application.Degree,
+                    application.Gender,
+                    application.StudyField,
+                    application.UniversityName
+                }
+            };
+
+            return new JsonResult(result);
+        }
+
+
+        public JsonResult OnPostApproveApplications([FromBody] int[] applicationIds)
+        {
+            var applications = _context.Applications.Where(a => applicationIds.Contains(a.Id)).ToList();
+
+            foreach (var application in applications)
+            {
+                application.Status = "Accepted";
+            }
+
+            _context.SaveChanges();
+            return new JsonResult(new { success = true, message = "Selected applications approved." });
+        }
+
+        public JsonResult OnPostRejectApplications([FromBody] dynamic payload)
+        {
+            int[] applicationIds = payload.applicationIds.ToObject<int[]>();
+            string reason = payload.reason;
+
+            var applications = _context.Applications.Where(a => applicationIds.Contains(a.Id)).ToList();
+
+            foreach (var application in applications)
+            {
+                application.Status = "Rejected - " + reason;
+            }
+
+            _context.SaveChanges();
+            return new JsonResult(new { success = true, message = "Selected applications rejected." });
+        }
+
+
+        public IActionResult OnPostUpdateStatus()
+        {
+            if (SelectedApplicationIds == null || !SelectedApplicationIds.Any())
+            {
+                TempData["ErrorMessage"] = "No applications selected.";
+                return RedirectToPage();
+            }
+
+            var applications = _context.Applications.Where(a => SelectedApplicationIds.Contains(a.Id)).ToList();
+
+            foreach (var application in applications)
+            {
+                application.Status = StatusUpdate;
+            }
+
+            _context.SaveChanges();
+            TempData["SuccessMessage"] = "Status updated successfully.";
+            return RedirectToPage();
+        }
+
+        public JsonResult OnPostGenerateReport(string reportType)
+        {
+            object reportData;
+
+            switch (reportType)
+            {
+                case "Applicants":
+                    reportData = _context.Applications
+                        .Where(a => a.Status == "Applicant")
+                        .Include(a => a.Student)
+                        .Include(a => a.Program)
+                        .Select(a => new
+                        {
+                            a.Id,
+                            a.FirstName,
+                            a.LastName,
+                            a.Program.Name
+                        }).ToList();
+                    break;
+
+                case "ApplicationsPerYear":
+                    reportData = _context.Applications
+                        .GroupBy(a => a.ApplicationDate)
+                        .Select(g => new { Year = g.Key, Count = g.Count() })
+                        .ToList();
+                    break;
+
+                case "ApplicationsPerHostUniversity":
+                    reportData = _context.Applications
+                        .GroupBy(a => a.Program.Name)
+                        .Select(g => new { Program = g.Key, Count = g.Count() })
+                        .ToList();
+                    break;
+
+                default:
+                    return new JsonResult(new { success = false, message = "Invalid report type." });
+            }
+
+            return new JsonResult(new { success = true, data = reportData });
+        }
+
 
         public IActionResult OnPostChangeEmail()
         {
@@ -132,43 +280,6 @@ namespace ExchangeProgram.Pages
             TempData["ActiveTab"] = "password";
             return RedirectToPage();
         }
-
-        //public IActionResult OnPostDeleteStudent(int studentId)
-        //{
-        //    var student = _context.Students.FirstOrDefault(s => s.Id == studentId && s.isStudent);
-        //    if (student != null)
-        //    {
-        //        // Löschen der zugehörigen Dokumente
-        //        var documents = _context.Documents.Where(d => d.StudentId == studentId).ToList();
-        //        _context.Documents.RemoveRange(documents);
-
-        //        // Löschen des Studenten
-        //        _context.Students.Remove(student);
-        //        _context.SaveChanges();
-
-        //        TempData["SuccessMessage"] = "Student and associated documents deleted successfully!";
-        //    }
-        //    else
-        //    {
-        //        TempData["ErrorMessage"] = "Student not found.";
-        //    }
-
-        //    TempData["ActiveTab"] = "students";
-        //    return RedirectToPage();
-        //}
-
-        //public IActionResult OnGetDownloadDocument(int documentId)
-        //{
-        //    var document = _context.Documents.FirstOrDefault(d => d.Id == documentId);
-        //    if (document != null)
-        //    {
-        //        return File(document.FileData, "application/octet-stream", document.FileName);
-        //    }
-
-        //    TempData["ErrorMessage"] = "Document not found.";
-        //    TempData["ActiveTab"] = "students";
-        //    return RedirectToPage();
-        //}
 
         public IActionResult OnPostCreateProgram()
         {
