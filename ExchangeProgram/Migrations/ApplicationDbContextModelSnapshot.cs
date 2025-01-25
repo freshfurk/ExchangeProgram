@@ -139,14 +139,23 @@ namespace ExchangeProgram.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CourseOfStudy")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("Deadline")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("HostUniversityName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("SemesterStart")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 

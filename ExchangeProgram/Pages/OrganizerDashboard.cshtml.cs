@@ -48,8 +48,18 @@ namespace ExchangeProgram.Pages
         [BindProperty]
         public DateTime ProgramDeadline { get; set; }
 
+        [BindProperty]
+        public string ProgramHostUniversityName { get; set; }
+
+        [BindProperty]
+        public DateTime ProgramSemesterStart { get; set; }
+
+        [BindProperty]
+        public string ProgramCourseOfStudy { get; set; }
+
         // Properties
         public List<Application> Applications { get; set; } = new();
+
         public List<Programs> Programs { get; set; } = new();
 
         [BindProperty]
@@ -74,6 +84,21 @@ namespace ExchangeProgram.Pages
             Programs = _context.Programs.ToList();
 
             return Page();
+        }
+
+        public IActionResult OnGetDownloadDocument(int documentId)
+        {
+            var document = _context.Documents.FirstOrDefault(d => d.Id == documentId);
+            if (document == null)
+            {
+                return NotFound("Document not found");
+            }
+
+            var fileContent = document.FileData; // Annahme: Das Dokument ist als Byte-Array gespeichert
+            var contentType = "application/octet-stream"; // Allgemeiner MIME-Typ; kann angepasst werden
+            var fileName = document.FileName;
+
+            return File(fileContent, contentType, fileName);
         }
 
         public JsonResult OnGetApplicationDetails(int applicationId)
@@ -118,98 +143,164 @@ namespace ExchangeProgram.Pages
             return new JsonResult(result);
         }
 
-
-        public JsonResult OnPostApproveApplications([FromBody] int[] applicationIds)
+        public IActionResult OnPostApproveSelected(int[] selectedApplicationIds)
         {
-            var applications = _context.Applications.Where(a => applicationIds.Contains(a.Id)).ToList();
+            if (selectedApplicationIds == null || !selectedApplicationIds.Any())
+            {
+                TempData["ErrorMessage"] = "No applications selected for approval.";
+                return RedirectToPage();
+            }
+
+            var applications = _context.Applications.Where(a => selectedApplicationIds.Contains(a.Id)).ToList();
 
             foreach (var application in applications)
             {
-                application.Status = "Accepted";
+                application.Status = "Approved";
             }
 
             _context.SaveChanges();
-            return new JsonResult(new { success = true, message = "Selected applications approved." });
+            TempData["SuccessMessage"] = "Selected applications approved successfully.";
+            return RedirectToPage();
         }
 
-        public JsonResult OnPostRejectApplications([FromBody] dynamic payload)
+        public IActionResult OnPostRejectSelected(string selectedApplicationIds, string rejectReason)
         {
-            int[] applicationIds = payload.applicationIds.ToObject<int[]>();
-            string reason = payload.reason;
-
-            var applications = _context.Applications.Where(a => applicationIds.Contains(a.Id)).ToList();
-
-            foreach (var application in applications)
-            {
-                application.Status = "Rejected - " + reason;
-            }
-
-            _context.SaveChanges();
-            return new JsonResult(new { success = true, message = "Selected applications rejected." });
-        }
-
-
-        public IActionResult OnPostUpdateStatus()
-        {
-            if (SelectedApplicationIds == null || !SelectedApplicationIds.Any())
+            if (string.IsNullOrWhiteSpace(selectedApplicationIds))
             {
                 TempData["ErrorMessage"] = "No applications selected.";
                 return RedirectToPage();
             }
 
-            var applications = _context.Applications.Where(a => SelectedApplicationIds.Contains(a.Id)).ToList();
+            if (string.IsNullOrWhiteSpace(rejectReason))
+            {
+                TempData["ErrorMessage"] = "Rejection reason is required.";
+                return RedirectToPage();
+            }
 
+            // IDs parsen (sie kommen als CSV)
+            var applicationIds = selectedApplicationIds.Split(',').Select(int.Parse).ToArray();
+
+            // Bewerbungen abrufen
+            var applications = _context.Applications.Where(a => applicationIds.Contains(a.Id)).ToList();
+
+            if (!applications.Any())
+            {
+                TempData["ErrorMessage"] = "No applications found.";
+                return RedirectToPage();
+            }
+
+            // Status und Grund aktualisieren
             foreach (var application in applications)
             {
-                application.Status = StatusUpdate;
+                application.Status = "Rejected: " + rejectReason;
             }
 
             _context.SaveChanges();
-            TempData["SuccessMessage"] = "Status updated successfully.";
+
+            TempData["SuccessMessage"] = $"{applications.Count} application(s) rejected successfully!";
             return RedirectToPage();
         }
 
-        public JsonResult OnPostGenerateReport(string reportType)
+        public IActionResult OnGetGenerateReport(string reportType)
         {
-            object reportData;
+            if (string.IsNullOrWhiteSpace(reportType))
+            {
+                TempData["ErrorMessage"] = "Please select a report type.";
+                return RedirectToPage();
+            }
+
+            byte[] reportData;
+            string fileName;
 
             switch (reportType)
             {
-                case "Applicants":
-                    reportData = _context.Applications
-                        .Where(a => a.Status == "Applicant")
+                case "applicants":
+                    // Erstelle eine Liste aller Bewerber für das Auswahlverfahren
+                    var applicants = _context.Applications
                         .Include(a => a.Student)
                         .Include(a => a.Program)
                         .Select(a => new
                         {
-                            a.Id,
-                            a.FirstName,
-                            a.LastName,
-                            a.Program.Name
-                        }).ToList();
-                    break;
-
-                case "ApplicationsPerYear":
-                    reportData = _context.Applications
-                        .GroupBy(a => a.ApplicationDate)
-                        .Select(g => new { Year = g.Key, Count = g.Count() })
+                            FirstName = a.FirstName,
+                            LastName = a.LastName,
+                            Program = a.Program.Name,
+                            ApplicationDate = a.ApplicationDate,
+                            Status = a.Status,
+                            Birthdate = a.BirthDate,
+                            Gender = a.Gender,
+                            Nationality = a.Nationality,
+                            Email = a.ContactEmail,
+                            PhoneNumber = a.PhoneNumber,
+                            Address = a.Address,
+                            HouseNumber = a.HouseNumber,
+                            City = a.City,
+                            Country = a.Country,
+                            UniversityName = a.UniversityName,
+                            StudyField = a.StudyField,
+                            Degree = a.Degree,
+                            MatriculationNumber = a.MatriculationNumber
+                        })
                         .ToList();
+
+                    reportData = GenerateCsvReport(applicants);
+                    fileName = "Applicants_Report.csv";
                     break;
 
-                case "ApplicationsPerHostUniversity":
-                    reportData = _context.Applications
+                case "applicationsByYear":
+                    // Gruppiere Bewerbungen nach Jahr
+                    var applicationsByYear = _context.Applications
+                        .GroupBy(a => a.ApplicationDate.Value.Year)
+                        .Select(g => new
+                        {
+                            Year = g.Key,
+                            Count = g.Count()
+                        })
+                        .ToList();
+
+                    reportData = GenerateCsvReport(applicationsByYear);
+                    fileName = "Applications_By_Year_Report.csv";
+                    break;
+
+                case "applicationsByHost":
+                    // Gruppiere Bewerbungen nach Gastuniversität
+                    var applicationsByHost = _context.Applications
+                        .Include(a => a.Program)
                         .GroupBy(a => a.Program.Name)
-                        .Select(g => new { Program = g.Key, Count = g.Count() })
+                        .Select(g => new
+                        {
+                            HostUniversity = g.Key,
+                            Count = g.Count()
+                        })
                         .ToList();
+
+                    reportData = GenerateCsvReport(applicationsByHost);
+                    fileName = "Applications_By_Host_Report.csv";
                     break;
 
                 default:
-                    return new JsonResult(new { success = false, message = "Invalid report type." });
+                    TempData["ErrorMessage"] = "Invalid report type selected.";
+                    return RedirectToPage();
             }
 
-            return new JsonResult(new { success = true, data = reportData });
+            return File(reportData, "text/csv", fileName);
         }
 
+        private byte[] GenerateCsvReport<T>(IEnumerable<T> data)
+        {
+            var csvBuilder = new StringBuilder();
+
+            // Header hinzufügen
+            var properties = typeof(T).GetProperties();
+            csvBuilder.AppendLine(string.Join(";", properties.Select(p => p.Name)));
+
+            // Datenzeilen hinzufügen
+            foreach (var item in data)
+            {
+                csvBuilder.AppendLine(string.Join(";", properties.Select(p => p.GetValue(item)?.ToString()?.Replace(";", " "))));
+            }
+
+            return Encoding.UTF8.GetBytes(csvBuilder.ToString());
+        }
 
         public IActionResult OnPostChangeEmail()
         {
@@ -294,7 +385,10 @@ namespace ExchangeProgram.Pages
             {
                 Name = ProgramName,
                 Description = ProgramDescription,
-                Deadline = ProgramDeadline
+                Deadline = ProgramDeadline,
+                CourseOfStudy = ProgramCourseOfStudy,
+                SemesterStart = ProgramSemesterStart,
+                HostUniversityName = ProgramHostUniversityName
             };
 
             _context.Programs.Add(newProgram);
@@ -305,20 +399,19 @@ namespace ExchangeProgram.Pages
             return RedirectToPage();
         }
 
-        public IActionResult OnPostDeleteProgram(int programId)
+        public IActionResult OnPostDeletePrograms([FromForm] int[] selectedProgramIds)
         {
-            var program = _context.Programs.FirstOrDefault(p => p.Id == programId);
-            if (program != null)
+            if (selectedProgramIds == null || selectedProgramIds.Length == 0)
             {
-                _context.Programs.Remove(program);
-                _context.SaveChanges();
-                TempData["SuccessMessage"] = "Program deleted successfully!";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Program not found.";
+                TempData["ErrorMessage"] = "No programs selected for deletion.";
+                return RedirectToPage();
             }
 
+            var programsToDelete = _context.Programs.Where(p => selectedProgramIds.Contains(p.Id)).ToList();
+            _context.Programs.RemoveRange(programsToDelete);
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = "Selected programs deleted successfully.";
             TempData["ActiveTab"] = "programs";
             return RedirectToPage();
         }

@@ -355,8 +355,11 @@
 									} required>
 									<div class="flex-grow-1">
 										<h5 class="mb-1">@program.Name</h5>
-										<p class="mb-1">@program.Description</p>
-										<small>Deadline: @(program.Deadline?.ToString("dd.MM.yyyy") ?? "No deadline available")</small>
+										<p class="mb-1">@program.HostUniversityName</p>
+										<p class="mb-1">@program.CourseOfStudy</p>
+										<small class="mb-1">@program.Description</small>
+										<div><small class="mb-1">Semester Start: @(program.SemesterStart?.ToString("dd.MM.yyyy") ?? "Every Semester")</small></div>
+										<div><small>Deadline: @(program.Deadline?.ToString("dd.MM.yyyy") ?? "No Deadline")</small></div>
 									</div>
 								</li>
 							}

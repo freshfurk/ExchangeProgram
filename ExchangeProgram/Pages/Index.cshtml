@@ -227,8 +227,11 @@
 						<div class="col-md-4">
 							<div class="program-card">
 								<h4>@program.Name</h4>
-								<p>@program.Description</p>
-								<p><strong>Deadline:</strong> @(program.Deadline?.ToString("dd.MM.yyyy") ?? "No deadline available")</p>
+								<div>@program.HostUniversityName</div>
+								<div class="mb-1">@program.CourseOfStudy</div>
+								<div><small>@program.Description</small></div>
+								<div><small><strong>Semester Start:</strong> @(program.SemesterStart?.ToString("dd.MM.yyyy") ?? "Every Semester")</small></div>
+								<div><small><strong>Deadline:</strong> @(program.Deadline?.ToString("dd.MM.yyyy") ?? "No Deadline")</small></div>
 							</div>
 						</div>
 					}

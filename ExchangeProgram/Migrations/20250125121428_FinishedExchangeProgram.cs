@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ExchangeProgram.Migrations
 {
     /// <inheritdoc />
-    public partial class ApplyToExchangePrograms : Migration
+    public partial class FinishedExchangeProgram : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,7 +19,10 @@ namespace ExchangeProgram.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Deadline = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Deadline = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    HostUniversityName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SemesterStart = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CourseOfStudy = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {

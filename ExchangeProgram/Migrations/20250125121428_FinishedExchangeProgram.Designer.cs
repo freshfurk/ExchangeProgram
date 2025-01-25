@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExchangeProgram.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250123095806_ApplyToExchangePrograms")]
-    partial class ApplyToExchangePrograms
+    [Migration("20250125121428_FinishedExchangeProgram")]
+    partial class FinishedExchangeProgram
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -142,14 +142,23 @@ namespace ExchangeProgram.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CourseOfStudy")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("Deadline")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("HostUniversityName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("SemesterStart")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
